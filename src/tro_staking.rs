@@ -3,8 +3,8 @@
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
-pub mod proxy;
 pub mod errors;
+pub mod proxy;
 
 mod admin;
 mod stake;
@@ -33,6 +33,14 @@ pub trait TroStaking: storage::StorageModule + stake::StakeModule + admin::Admin
         let payments = self.call_value().all_esdt_transfers();
 
         self.process_stake(&caller, &payments);
+    }
+
+    #[endpoint(unstake)]
+    fn unstake(&self, request: MultiValueEncoded<MultiValue2<TokenIdentifier, BigUint>>) {
+        let caller = self.blockchain().get_caller();
+        let payments = self.process_unstake(&caller, request);
+
+        self.send().direct_multi(&caller, &payments);
     }
 
     #[upgrade]

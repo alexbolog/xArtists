@@ -11,7 +11,7 @@ TODO Core Staking Implementation
   - DONE Implement stake functions:
     - Direct TRO staking
     - LP token staking
-  - Implement unstake functions
+  - DONE Implement unstake functions
   - Add unstake lock during active proposals
   - Add events for all actions
 
@@ -40,7 +40,8 @@ TODO Testing Framework
   - Unit tests for core functions
   - Integration tests:
     - Complete staking scenarios:
-        - Stake scenarios
+        - DONE Stake scenarios
+        - Unstake scenarios
     - Voting scenarios
     - Multiple LP pair scenarios
 
