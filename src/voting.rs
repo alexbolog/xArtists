@@ -1,7 +1,4 @@
-use crate::errors::{
-    ERR_INSUFFICIENT_VOTING_POWER, ERR_INVALID_TIME_RANGE, ERR_PROPOSAL_ACTIVE,
-    ERR_PROPOSAL_NOT_ACTIVE, ERR_PROPOSAL_NOT_FOUND,
-};
+use crate::errors::*;
 
 pub const DEFAULT_PROPOSAL_DURATION_IN_SECONDS: u64 = 24 * 3600; // Allow proposals to be active for 1 day by default
 pub const DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS: u64 = 3600; // Start proposal 1 hour after creation by default
@@ -87,7 +84,7 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
 
         // TODO: compute lp_to_tro_ratio for each lp token here
 
-        self.snapshot_lp_to_tro_ratio();
+        self.snapshot_lp_to_tro_ratio(proposal_id);
 
         self.proposals(proposal_id).set(proposal);
 
@@ -105,8 +102,9 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         let caller = self.blockchain().get_caller();
         self.require_proposal_exists(proposal_id);
         self.require_proposal_active(proposal_id);
+        self.require_user_has_not_voted(&caller, proposal_id);
 
-        let voting_power = self.get_voting_power(&caller);
+        let voting_power = self.get_voting_power(&caller, proposal_id);
 
         require!(voting_power > 0, ERR_INSUFFICIENT_VOTING_POWER);
 
@@ -116,9 +114,12 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         self.emit_vote_event(proposal_id, decision, &voting_power);
     }
 
-    fn snapshot_lp_to_tro_ratio(&self) {
-        // TODO: mock this for testing
+    fn snapshot_lp_to_tro_ratio(&self, proposal_id: u64) {
         // TODO: implement this
+        for lp_token in self.whitelisted_lp_token_identifiers().iter() {
+            self.lp_to_tro_ratio(proposal_id, lp_token)
+                .set(BigUint::from(1u64));
+        }
     }
 
     // TODO: add unit tests for this
@@ -164,18 +165,21 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         new_proposal_id
     }
 
-    fn get_voting_power(&self, user: &ManagedAddress) -> BigUint<Self::Api> {
-        let mut voting_power = BigUint::zero();
+    fn get_voting_power(&self, user: &ManagedAddress, proposal_id: u64) -> BigUint<Self::Api> {
+        let tro_staked = self
+            .users_stake(user, &self.tro_token_identifier().get())
+            .get();
+        let mut lp_voting_power = BigUint::zero();
 
         for lp_token in self.whitelisted_lp_token_identifiers().iter() {
             let staked_lp_balance = self.users_stake(user, &lp_token).get();
-            let lp_to_tro_ratio = self.lp_to_tro_ratio(lp_token).get();
+            let lp_to_tro_ratio = self.lp_to_tro_ratio(proposal_id, lp_token).get();
             let tro_equivalent = staked_lp_balance * lp_to_tro_ratio / DIVISION_GUARD;
 
-            voting_power += tro_equivalent;
+            lp_voting_power += tro_equivalent;
         }
 
-        voting_power
+        lp_voting_power + tro_staked
     }
 
     fn require_time_range_is_valid(&self, start_time: u64, end_time: u64) {
@@ -222,8 +226,11 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         );
     }
 
-    fn _require_user_has_not_voted(&self, _user: &ManagedAddress, _proposal_id: u64) {
-        // WAIT: Do nothing for now, discuss with team
+    fn require_user_has_not_voted(&self, user: &ManagedAddress, proposal_id: u64) {
+        require!(
+            self.user_votes(user, proposal_id).get() == BigUint::zero(),
+            ERR_USER_ALREADY_VOTED
+        );
     }
 
     // Counter for proposal ids
@@ -249,5 +256,9 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
 
     #[view(getLpToTroRatio)]
     #[storage_mapper("lp_to_tro_ratio")]
-    fn lp_to_tro_ratio(&self, lp_token: TokenIdentifier) -> SingleValueMapper<BigUint>;
+    fn lp_to_tro_ratio(
+        &self,
+        proposal_id: u64,
+        lp_token: TokenIdentifier,
+    ) -> SingleValueMapper<BigUint>;
 }
