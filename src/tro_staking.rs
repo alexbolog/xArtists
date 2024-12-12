@@ -18,7 +18,11 @@ mod voting;
 /// - earn rewards? TODO: check with team
 #[multiversx_sc::contract]
 pub trait TroStaking:
-    storage::StorageModule + stake::StakeModule + admin::AdminModule + events::EventsModule
+    storage::StorageModule
+    + stake::StakeModule
+    + admin::AdminModule
+    + events::EventsModule
+    + voting::VotingModule
 {
     #[init]
     fn init(
@@ -28,6 +32,7 @@ pub trait TroStaking:
     ) {
         self.tro_token_identifier().set(tro_token_identifier);
         self.add_whitelisted_lp_tokens(lp_token_identifiers);
+        self.last_proposal_id().set(0);
     }
 
     #[payable("*")]
