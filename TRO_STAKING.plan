@@ -24,12 +24,12 @@ TODO External Pair Integration
   - Calculate TRO equivalent from LP tokens
 
 TODO Voting System
-  - Add proposal storage and creation
+  - DONE Add proposal storage and creation
   - Implement voting power calculation:
     - Direct TRO power
     - LP-based TRO power
-  - Add voting mechanism
-  - Add proposal lifecycle management
+  - DONE Add voting mechanism
+  - DONE Add proposal lifecycle management
 
 TODO Analytics & Views
   - Add user stake information views
