@@ -51,6 +51,9 @@ pub trait TroStaking:
         let caller = self.blockchain().get_caller();
         let payments = self.process_unstake(&caller, request);
 
+        // Security: prevent unstake if there is an ongoing proposal
+        self.require_no_proposal_ongoing();
+
         self.send().direct_multi(&caller, &payments);
 
         self.emit_unstake_event(&caller, &payments);

@@ -1,23 +1,29 @@
 use crate::errors::{
-    ERR_INSUFFICIENT_VOTING_POWER, ERR_PROPOSAL_NOT_ACTIVE, ERR_PROPOSAL_NOT_FOUND,
+    ERR_INSUFFICIENT_VOTING_POWER, ERR_INVALID_TIME_RANGE, ERR_PROPOSAL_ACTIVE,
+    ERR_PROPOSAL_NOT_ACTIVE, ERR_PROPOSAL_NOT_FOUND,
 };
 
 pub const DEFAULT_PROPOSAL_DURATION_IN_SECONDS: u64 = 24 * 3600; // Allow proposals to be active for 1 day by default
 pub const DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS: u64 = 3600; // Start proposal 1 hour after creation by default
+pub const DIVISION_GUARD: u64 = 1000000000000000000; // 1e18
 
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
+/// Representation of voting options
+/// Invalid it not considered a valid vote thus is being completely
+/// ignored from the voting validation logic
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi)]
 pub enum VoteDecision {
-    Invalid = 1,
-    Approve = 2,
-    Abstain = 3,
-    Reject = 4,
+    Invalid = 0,
+    Approve = 1,
+    Abstain = 2,
+    Reject = 3,
 }
 
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, TypeAbi)]
 pub enum ProposalStatus {
+    Invalid = 0,
     Pending = 1,
     Active = 2,
     Approved = 3,
@@ -45,9 +51,10 @@ pub struct ProposalViewStatus<M: ManagedTypeApi> {
 }
 
 #[multiversx_sc::module]
-pub trait VotingModule {
+pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsModule {
     #[only_owner]
     #[endpoint(createProposal)]
+    #[allow_multiple_var_args]
     fn create_proposal(
         &self,
         title: ManagedBuffer,
@@ -65,18 +72,32 @@ pub trait VotingModule {
             .into_option()
             .unwrap_or(start_time + DEFAULT_PROPOSAL_DURATION_IN_SECONDS);
 
+        self.require_time_range_is_valid(start_time, end_time);
+
         let proposal = Proposal {
             id: proposal_id,
-            title,
-            description,
+            title: title.clone(),
+            description: description.clone(),
             creator: self.blockchain().get_caller(),
             created_at: self.blockchain().get_block_timestamp(),
             start_time,
             end_time,
-            min_voting_power_to_validate_vote,
+            min_voting_power_to_validate_vote: min_voting_power_to_validate_vote.clone(),
         };
 
+        // TODO: compute lp_to_tro_ratio for each lp token here
+
+        self.snapshot_lp_to_tro_ratio();
+
         self.proposals(proposal_id).set(proposal);
+
+        self.emit_proposal_created_event(
+            proposal_id,
+            &title,
+            &min_voting_power_to_validate_vote,
+            start_time,
+            end_time,
+        );
     }
 
     #[endpoint(vote)]
@@ -89,8 +110,15 @@ pub trait VotingModule {
 
         require!(voting_power > 0, ERR_INSUFFICIENT_VOTING_POWER);
 
-        self.proposal_votes(proposal_id, decision)
+        self.proposal_votes(proposal_id, &decision)
             .update(|votes| *votes += &voting_power);
+
+        self.emit_vote_event(proposal_id, decision, &voting_power);
+    }
+
+    fn snapshot_lp_to_tro_ratio(&self) {
+        // TODO: mock this for testing
+        // TODO: implement this
     }
 
     // TODO: add unit tests for this
@@ -107,11 +135,13 @@ pub trait VotingModule {
 
     fn get_proposal_vote_result(&self, proposal: &Proposal<Self::Api>) -> ProposalStatus {
         let approve_votes = self
-            .proposal_votes(proposal.id, VoteDecision::Approve)
+            .proposal_votes(proposal.id, &VoteDecision::Approve)
             .get();
-        let reject_votes = self.proposal_votes(proposal.id, VoteDecision::Reject).get();
+        let reject_votes = self
+            .proposal_votes(proposal.id, &VoteDecision::Reject)
+            .get();
         let abstain_votes = self
-            .proposal_votes(proposal.id, VoteDecision::Abstain)
+            .proposal_votes(proposal.id, &VoteDecision::Abstain)
             .get();
 
         let total_votes = &approve_votes + &reject_votes + &abstain_votes;
@@ -134,6 +164,36 @@ pub trait VotingModule {
         new_proposal_id
     }
 
+    fn get_voting_power(&self, user: &ManagedAddress) -> BigUint<Self::Api> {
+        let mut voting_power = BigUint::zero();
+
+        for lp_token in self.whitelisted_lp_token_identifiers().iter() {
+            let staked_lp_balance = self.users_stake(user, &lp_token).get();
+            let lp_to_tro_ratio = self.lp_to_tro_ratio(lp_token).get();
+            let tro_equivalent = staked_lp_balance * lp_to_tro_ratio / DIVISION_GUARD;
+
+            voting_power += tro_equivalent;
+        }
+
+        voting_power
+    }
+
+    fn require_time_range_is_valid(&self, start_time: u64, end_time: u64) {
+        let current_timestamp = self.blockchain().get_block_timestamp();
+
+        require!(start_time < end_time, ERR_INVALID_TIME_RANGE);
+        require!(current_timestamp < start_time, ERR_INVALID_TIME_RANGE);
+        require!(current_timestamp < end_time, ERR_INVALID_TIME_RANGE);
+        require!(
+            end_time - start_time >= DEFAULT_PROPOSAL_DURATION_IN_SECONDS,
+            ERR_INVALID_TIME_RANGE
+        );
+        require!(
+            end_time - start_time >= DEFAULT_PROPOSAL_DURATION_IN_SECONDS,
+            ERR_INVALID_TIME_RANGE
+        );
+    }
+
     fn require_proposal_exists(&self, proposal_id: u64) {
         require!(
             !self.proposals(proposal_id).is_empty(),
@@ -148,8 +208,18 @@ pub trait VotingModule {
         );
     }
 
-    fn get_voting_power(&self, user: &ManagedAddress) -> BigUint<Self::Api> {
-        todo!()
+    fn require_no_proposal_ongoing(&self) {
+        let last_proposal = self.last_proposal_id().get();
+        let last_proposal_status = self.get_proposal_status(&self.proposals(last_proposal).get());
+
+        require!(
+            last_proposal_status != ProposalStatus::Active,
+            ERR_PROPOSAL_ACTIVE
+        );
+    }
+
+    fn _require_user_has_not_voted(&self, _user: &ManagedAddress, _proposal_id: u64) {
+        // WAIT: Do nothing for now, discuss with team
     }
 
     // Counter for proposal ids
@@ -166,6 +236,14 @@ pub trait VotingModule {
     fn proposal_votes(
         &self,
         proposal_id: u64,
-        decision: VoteDecision,
+        decision: &VoteDecision,
     ) -> SingleValueMapper<BigUint>;
+
+    #[view(getUserVotes)]
+    #[storage_mapper("user_votes")]
+    fn user_votes(&self, user: &ManagedAddress, proposal_id: u64) -> SingleValueMapper<BigUint>;
+
+    #[view(getLpToTroRatio)]
+    #[storage_mapper("lp_to_tro_ratio")]
+    fn lp_to_tro_ratio(&self, lp_token: TokenIdentifier) -> SingleValueMapper<BigUint>;
 }
