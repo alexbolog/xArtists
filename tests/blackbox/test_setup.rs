@@ -13,6 +13,7 @@ fn add_account(world: &mut ScenarioWorld, address: TestAddress) {
         .account(address)
         .nonce(1)
         .balance(INITIAL_TOKEN_BALANCE)
+        .esdt_balance(TRO_TOKEN_ID, INITIAL_TOKEN_BALANCE)
         .esdt_balance(LP_TOKEN_ID_1, INITIAL_TOKEN_BALANCE)
         .esdt_balance(LP_TOKEN_ID_2, INITIAL_TOKEN_BALANCE)
         .esdt_balance(LP_TOKEN_ID_3, INITIAL_TOKEN_BALANCE)
@@ -52,7 +53,6 @@ fn deploy_contract(world: &mut ScenarioWorld) {
 fn apply_blackbox_setup(world: &mut ScenarioWorld) {
     add_account(world, OWNER_ADDRESS);
     add_account(world, USER_ADDRESS);
-    add_supported_lp_token(world, &[&LP_TOKEN_ID_1, &LP_TOKEN_ID_2, &LP_TOKEN_ID_3]);
 }
 
 pub fn setup_world() -> ScenarioWorld {
@@ -65,5 +65,9 @@ pub fn setup_world() -> ScenarioWorld {
 pub fn setup_world_with_contract() -> ScenarioWorld {
     let mut world = setup_world();
     deploy_contract(&mut world);
+    add_supported_lp_token(
+        &mut world,
+        &[&LP_TOKEN_ID_1, &LP_TOKEN_ID_2, &LP_TOKEN_ID_3],
+    );
     world
 }

@@ -4,9 +4,9 @@
 use multiversx_sc::imports::*;
 
 pub mod proxy;
+pub mod errors;
 
 mod admin;
-mod errors;
 mod stake;
 mod storage;
 
