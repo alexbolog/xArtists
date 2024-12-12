@@ -3,6 +3,8 @@
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
+pub mod proxy;
+
 mod admin;
 mod errors;
 mod stake;
