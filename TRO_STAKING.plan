@@ -1,0 +1,83 @@
+Project: TRO Staking Smart Contract
+----------------------------------------
+
+DONE Project Setup
+  - Initialize MultiversX project structure
+  - Create basic contract file
+  - Setup Cargo.toml with dependencies
+  - Add init and upgrade functions
+
+TODO Contract Storage Design
+  - Define storage mappers:
+    - User stakes (Address -> Amount)
+    - Total staked amount
+    - Reward rate
+    - Last reward timestamp
+    - User reward debt
+    - LP token identifier
+
+TODO Core Staking Implementation
+  - Add stake() function:
+    - Accept TRO tokens
+    - Update user's staked amount
+    - Calculate and store reward debt
+    - Emit staking event
+  - Add unstake() function:
+    - Validate unstake amount
+    - Update staking balance
+    - Transfer tokens back to user
+    - Emit unstaking event
+  - Implement reward system:
+    - Add reward calculation logic
+    - Add claim_rewards() function
+    - Add reward distribution mechanism
+
+TODO LP Token Integration
+  - Add LP token configuration:
+    - Store LP token identifier
+    - Set LP/TRO token ratio
+  - Implement LP staking:
+    - Add stake_lp() function
+    - Add unstake_lp() function
+    - Modify reward calculations for LP
+
+TODO Governance Features
+  - Add voting power system:
+    - Calculate voting power based on stake
+    - Include time-weighted voting
+  - Implement governance token:
+    - Add minting logic
+    - Set conversion rates
+  - Add proposal system:
+    - Create proposal structure
+    - Add voting functions
+    - Add proposal execution
+
+WAIT Security Considerations
+  - Determine reentrancy protection needs
+  - Decide on pause mechanism
+  - Set minimum/maximum stake amounts
+  - Define unstaking timelock period
+
+TODO Testing Framework
+  - Unit tests:
+    - Staking/unstaking scenarios
+    - Reward calculations
+    - LP token operations
+    - Governance functions
+  - Integration tests:
+    - End-to-end staking flow
+    - Complex reward scenarios
+    - Governance proposals
+
+SKIP Future Enhancements
+  - Emergency withdrawal function
+  - Stake delegation system
+  - Advanced reward strategies
+  - Multiple token support
+
+NOTE Development Guidelines
+  - Follow MultiversX best practices
+  - Document all public functions
+  - Add comprehensive error messages
+  - Include events for all major actions

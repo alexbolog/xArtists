@@ -1,0 +1,16 @@
+# Build artifacts
+/target
+/output
+/wasm
+/build
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.vs/
+
+# OS specific files
+.DS_Store
+Thumbs.db
