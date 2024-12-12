@@ -7,6 +7,7 @@ pub mod errors;
 pub mod proxy;
 
 mod admin;
+mod events;
 mod stake;
 mod storage;
 
@@ -15,7 +16,9 @@ mod storage;
 /// - participate in the xArtist governance mechanism
 /// - earn rewards? TODO: check with team
 #[multiversx_sc::contract]
-pub trait TroStaking: storage::StorageModule + stake::StakeModule + admin::AdminModule {
+pub trait TroStaking:
+    storage::StorageModule + stake::StakeModule + admin::AdminModule + events::EventsModule
+{
     #[init]
     fn init(
         &self,
@@ -33,6 +36,8 @@ pub trait TroStaking: storage::StorageModule + stake::StakeModule + admin::Admin
         let payments = self.call_value().all_esdt_transfers();
 
         self.process_stake(&caller, &payments);
+
+        self.emit_stake_event(&caller, &payments);
     }
 
     #[endpoint(unstake)]
@@ -41,6 +46,8 @@ pub trait TroStaking: storage::StorageModule + stake::StakeModule + admin::Admin
         let payments = self.process_unstake(&caller, request);
 
         self.send().direct_multi(&caller, &payments);
+
+        self.emit_unstake_event(&caller, &payments);
     }
 
     #[upgrade]
