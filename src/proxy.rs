@@ -290,7 +290,7 @@ where
 }
 
 #[type_abi]
-#[derive(TopEncode, TopDecode)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct VoteEvent<Api>
 where
     Api: ManagedTypeApi,
@@ -302,7 +302,7 @@ where
 }
 
 #[type_abi]
-#[derive(TopEncode, TopDecode)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub enum VoteDecision {
     Invalid,
     Approve,
