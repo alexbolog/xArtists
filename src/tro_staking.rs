@@ -10,7 +10,7 @@ mod admin;
 mod events;
 mod stake;
 mod storage;
-mod voting;
+pub mod voting;
 
 /// $TRO staking smart contract
 /// Users can stake $TRO and LP tokens in order to:
