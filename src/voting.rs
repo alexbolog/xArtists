@@ -210,6 +210,10 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
 
     fn require_no_proposal_ongoing(&self) {
         let last_proposal = self.last_proposal_id().get();
+        if last_proposal == 0 {
+            return;
+        }
+
         let last_proposal_status = self.get_proposal_status(&self.proposals(last_proposal).get());
 
         require!(

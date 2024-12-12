@@ -30,7 +30,7 @@ TODO Voting System
     - LP-based TRO power
   - DONE Add voting mechanism
   - DONE Add proposal lifecycle management
-  - WAIT Should users be allowed to only vote once or for full voting power? What if they stake more tokens in the pool?
+  - WAIT Should users be allowed to only vote once or for full voting power? What if they stake more tokens in the pool? Should they be allowed to?
 
 TODO Analytics & Views
   - Add user stake information views
