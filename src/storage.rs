@@ -13,5 +13,9 @@ pub trait StorageModule {
 
     #[view(getUsersStake)]
     #[storage_mapper("users_stake")]
-    fn users_stake(&self, token_identifier: &TokenIdentifier) -> SingleValueMapper<BigUint>;
+    fn users_stake(
+        &self,
+        users_address: &ManagedAddress,
+        token_identifier: &TokenIdentifier,
+    ) -> SingleValueMapper<BigUint>;
 }

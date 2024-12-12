@@ -1,0 +1,1 @@
+pub const ERR_INVALID_PAYMENT_TOKEN: &str = "Invalid payment token";
