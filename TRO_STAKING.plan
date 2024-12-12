@@ -25,8 +25,9 @@ TODO External Pair Integration
 
 TODO Voting System
   - DONE Add proposal storage and creation
+  - DONE Only owner can create proposals
   - Implement voting power calculation:
-    - Direct TRO power
+    - DONE Direct TRO power
     - LP-based TRO power
   - DONE Add voting mechanism
   - DONE Add proposal lifecycle management
@@ -45,6 +46,12 @@ TODO Testing Framework
         - DONE Stake scenarios
         - DONE Unstake scenarios
     - Voting scenarios
+        - DONE Valid proposal creation
+        - DONE Valid voting action
+        - Valid proposal status
+        - Valid power calculation:
+          - $TRO power
+          - LP tokens $TRO power
     - Multiple LP pair scenarios
 
 WAIT Reward System
