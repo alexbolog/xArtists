@@ -49,6 +49,33 @@ fn lp_stake_should_succeed() {
 }
 
 #[test]
+fn stake_many_should_succeed() {
+    let mut world = setup_world_with_contract();
+
+    let stake_amount = 1000u64;
+    let lp_token_ids = [TRO_TOKEN_ID, LP_TOKEN_ID_1, LP_TOKEN_ID_2, LP_TOKEN_ID_3];
+
+    let mut payments = MultiEsdtPayment::new();
+    for token_id in lp_token_ids {
+        payments.push(EsdtTokenPayment::new(
+            token_id.to_token_identifier(),
+            0u64,
+            BigUint::from(stake_amount),
+        ));
+    }
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .stake()
+        .multi_esdt(payments)
+        .returns(ExpectStatus(0u64))
+        .run();
+}
+
+#[test]
 fn stake_unsupported_token_should_fail() {
     let mut world = setup_world_with_contract();
 

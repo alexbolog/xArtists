@@ -96,6 +96,19 @@ where
             .original_result()
     }
 
+    pub fn unstake<
+        Arg0: ProxyArg<MultiValueEncoded<Env::Api, MultiValue2<TokenIdentifier<Env::Api>, BigUint<Env::Api>>>>,
+    >(
+        self,
+        request: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("unstake")
+            .argument(&request)
+            .original_result()
+    }
+
     pub fn tro_token_identifier(
         self,
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, TokenIdentifier<Env::Api>> {

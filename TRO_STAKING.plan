@@ -39,9 +39,9 @@ TODO Analytics & Views
 TODO Testing Framework
   - Unit tests for core functions
   - Integration tests:
-    - Complete staking scenarios:
+    - DONE Complete staking scenarios:
         - DONE Stake scenarios
-        - Unstake scenarios
+        - DONE Unstake scenarios
     - Voting scenarios
     - Multiple LP pair scenarios
 
