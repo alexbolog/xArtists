@@ -3,6 +3,7 @@
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
+mod admin;
 mod stake;
 mod storage;
 
@@ -11,7 +12,7 @@ mod storage;
 /// - participate in the xArtist governance mechanism
 /// - earn rewards? TODO: check with team
 #[multiversx_sc::contract]
-pub trait TroStaking: storage::StorageModule + stake::StakeModule {
+pub trait TroStaking: storage::StorageModule + stake::StakeModule + admin::AdminModule {
     #[init]
     fn init(&self) {}
 
