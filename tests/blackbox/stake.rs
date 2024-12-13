@@ -91,6 +91,7 @@ fn stake_with_active_proposal_should_succeed() {
             BigUint::from(1u64),
             OptionalValue::<u64>::None,
             OptionalValue::<u64>::None,
+            MultiValueEncoded::new(),
         )
         .returns(ExpectStatus(0u64))
         .run();

@@ -269,6 +269,7 @@ fn unstake_should_fail_if_proposal_is_active() {
             BigUint::from(1u64),
             OptionalValue::<u64>::None,
             OptionalValue::<u64>::None,
+            MultiValueEncoded::new(),
         )
         .returns(ExpectStatus(0u64))
         .run();

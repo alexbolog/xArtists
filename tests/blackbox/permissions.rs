@@ -59,6 +59,7 @@ fn create_proposal_when_not_owner_should_fail() {
             min_voting_power_to_validate_vote,
             start_time,
             end_time,
+            MultiValueEncoded::new(),
         )
         .returns(ExpectStatus(4u64))
         .run();

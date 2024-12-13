@@ -34,6 +34,7 @@ fn create_proposal_should_succeed() {
             min_voting_power_to_validate_vote,
             start_time,
             end_time,
+            MultiValueEncoded::new(),
         )
         .returns(ExpectStatus(0u64))
         .run();
@@ -61,6 +62,7 @@ fn creating_multiple_simultaneous_proposals_should_succeed() {
                 min_voting_power_to_validate_vote.clone(),
                 start_time.clone(),
                 end_time.clone(),
+                MultiValueEncoded::new(),
             )
             .returns(ExpectStatus(0u64))
             .run();
@@ -115,6 +117,7 @@ fn create_proposal_with_invalid_time_range_should_fail() {
                 min_voting_power_to_validate_vote.clone(),
                 start_time.clone(),
                 end_time.clone(),
+                MultiValueEncoded::new(),
             )
             .returns(ExpectMessage(ERR_INVALID_TIME_RANGE))
             .run();
@@ -257,6 +260,7 @@ fn create_proposal(world: &mut ScenarioWorld) {
             min_voting_power_to_validate_vote,
             start_time,
             end_time,
+            MultiValueEncoded::new(),
         )
         .returns(ExpectStatus(0u64))
         .run();
