@@ -1,4 +1,4 @@
-use crate::voting::VoteDecision;
+use crate::voting::{VoteContext, VoteDecision};
 
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
@@ -92,23 +92,17 @@ pub trait EventsModule: crate::storage::StorageModule {
 
     fn emit_vote_event(
         &self,
+        voter: &ManagedAddress,
         proposal_id: u64,
-        decision: VoteDecision,
-        voting_power: &BigUint<Self::Api>,
+        decision: VoteContext<Self::Api>,
     ) {
-        let event = VoteEvent {
-            voter: self.blockchain().get_caller(),
-            proposal_id,
-            decision,
-            voting_power: voting_power.clone(),
-        };
-
         self.vote_event(
-            &self.blockchain().get_caller(),
+            voter,
+            proposal_id,
             self.blockchain().get_block_epoch(),
             self.blockchain().get_block_nonce(),
             self.blockchain().get_block_timestamp(),
-            &event,
+            &decision,
         );
     }
 
@@ -146,9 +140,10 @@ pub trait EventsModule: crate::storage::StorageModule {
     fn vote_event(
         &self,
         #[indexed] voter: &ManagedAddress,
+        #[indexed] proposal_id: u64,
         #[indexed] epoch: u64,
         #[indexed] block: u64,
         #[indexed] timestamp: u64,
-        event: &VoteEvent<Self::Api>,
+        event: &VoteContext<Self::Api>,
     );
 }

@@ -11,7 +11,7 @@ TODO Core Staking Implementation
   - DONE Implement stake functions
   - DONE Implement unstake functions
   - DONE Add unstake lock during active proposals
-  - Add events for all actions
+  - DONE Add events for all actions
     - DONE Stake/Unstake
     - DONE Vote
     - DONE Create Proposal
@@ -32,20 +32,24 @@ DONE Voting System
   - DONE Add voting mechanism
   - DONE Add proposal lifecycle management
   - DONE Should users be allowed to only vote once or for full voting power? What if they stake more tokens in the pool? Should they be allowed to?: Once and full power at voting time.
+  - DONE update vote event
 
-
-TODO Analytics & Views
-  - Add user stake information views
-  - Add proposal status views
-  - Add voting power views
-  - Add general statistics endpoints
+DONE Analytics & Views
+  - DONE Add user stake information views
+  - DONE Add proposal status views
+  - DONE Add voting power views
+  - WAIT Add general statistics endpoints
 
 TODO Testing Framework
   - Unit tests for core functions
   - Integration tests:
     - DONE Complete staking scenarios:
-        - DONE Stake scenarios
-        - DONE Unstake scenarios
+        - TODO Stake scenarios
+          - DONE Basic stake functionality
+          - TODO power adjustment on stake
+        - TODO Unstake scenarios
+          - DONE Basic unstake functionality
+          - TODO power adjustment on unstake
     - Voting scenarios
         - DONE Valid proposal creation
         - DONE Valid voting action

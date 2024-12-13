@@ -33,7 +33,7 @@ pub enum ProposalStatus {
     Failed = 5,
 }
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem, TypeAbi)]
 pub struct Proposal<M: ManagedTypeApi> {
     pub id: u64,
     pub title: ManagedBuffer<M>,
@@ -46,10 +46,20 @@ pub struct Proposal<M: ManagedTypeApi> {
 }
 
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi)]
-pub struct ProposalViewStatus<M: ManagedTypeApi> {
-    pub proposal: Proposal<M>,
-    pub status: ProposalStatus,
-    pub votes: BigUint<M>,
+pub struct VoteContext<M: ManagedTypeApi> {
+    pub decision: VoteDecision,
+    pub voting_power: BigUint<M>,
+    pub timestamp: u64,
+    pub block: u64,
+    pub epoch: u64,
+}
+
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem, TypeAbi)]
+pub struct ProposalVoteCount<M: ManagedTypeApi> {
+    pub approve: BigUint<M>,
+    pub abstain: BigUint<M>,
+    pub reject: BigUint<M>,
+    pub invalid: BigUint<M>,
 }
 
 #[multiversx_sc::module]
@@ -115,7 +125,23 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         self.proposal_votes(proposal_id, &decision)
             .update(|votes| *votes += &voting_power);
 
-        self.emit_vote_event(proposal_id, decision, &voting_power);
+        let vote_context = self
+            .get_proposal_vote_context(proposal_id, &caller)
+            .into_option()
+            .unwrap();
+        self.emit_vote_event(&caller, proposal_id, vote_context);
+    }
+
+    fn get_proposal_vote_context(
+        &self,
+        proposal_id: u64,
+        voter: &ManagedAddress,
+    ) -> OptionalValue<VoteContext<Self::Api>> {
+        if self.user_votes(voter, proposal_id).is_empty() {
+            return OptionalValue::None;
+        }
+
+        OptionalValue::Some(self.user_votes(voter, proposal_id).get())
     }
 
     fn snapshot_lp_to_tro_ratio(
@@ -236,9 +262,26 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
 
     fn require_user_has_not_voted(&self, user: &ManagedAddress, proposal_id: u64) {
         require!(
-            self.user_votes(user, proposal_id).get() == BigUint::zero(),
+            self.user_votes(user, proposal_id).is_empty(),
             ERR_USER_ALREADY_VOTED
         );
+    }
+
+    fn get_proposal_vote_count(&self, proposal_id: u64) -> ProposalVoteCount<Self::Api> {
+        ProposalVoteCount {
+            approve: self
+                .proposal_votes(proposal_id, &VoteDecision::Approve)
+                .get(),
+            abstain: self
+                .proposal_votes(proposal_id, &VoteDecision::Abstain)
+                .get(),
+            reject: self
+                .proposal_votes(proposal_id, &VoteDecision::Reject)
+                .get(),
+            invalid: self
+                .proposal_votes(proposal_id, &VoteDecision::Invalid)
+                .get(),
+        }
     }
 
     // Counter for proposal ids
@@ -246,7 +289,7 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
     #[storage_mapper("last_proposal_id")]
     fn last_proposal_id(&self) -> SingleValueMapper<u64>;
 
-    #[view(getProposals)]
+    #[view(getProposal)]
     #[storage_mapper("proposals")]
     fn proposals(&self, proposal_id: u64) -> SingleValueMapper<Proposal<Self::Api>>;
 
@@ -258,9 +301,13 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         decision: &VoteDecision,
     ) -> SingleValueMapper<BigUint>;
 
-    #[view(getUserVotes)]
+    #[view(getUserVote)]
     #[storage_mapper("user_votes")]
-    fn user_votes(&self, user: &ManagedAddress, proposal_id: u64) -> SingleValueMapper<BigUint>;
+    fn user_votes(
+        &self,
+        user: &ManagedAddress,
+        proposal_id: u64,
+    ) -> SingleValueMapper<VoteContext<Self::Api>>;
 
     #[view(getLpToTroRatio)]
     #[storage_mapper("lp_to_tro_ratio")]

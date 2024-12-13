@@ -10,6 +10,7 @@ mod admin;
 mod events;
 mod stake;
 mod storage;
+pub mod views;
 pub mod voting;
 
 /// $TRO staking smart contract
@@ -21,8 +22,9 @@ pub trait TroStaking:
     storage::StorageModule
     + stake::StakeModule
     + admin::AdminModule
-    + events::EventsModule
     + voting::VotingModule
+    + events::EventsModule
+    + views::ViewsModule
 {
     #[init]
     fn init(
