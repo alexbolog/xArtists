@@ -16,22 +16,23 @@ TODO Core Staking Implementation
     - DONE Vote
     - DONE Create Proposal
 
-TODO External Pair Integration
+SKIP External Pair Integration - skipped because we're going to supply the values from frontend
   - Add MapMapper storage for TokenIdentifier -> PoolConfiguration
   - Add supported pair types storage
   - Implement pair token fetching
   - Add LP token validation
   - Calculate TRO equivalent from LP tokens
 
-TODO Voting System
+DONE Voting System
   - DONE Add proposal storage and creation
   - DONE Only owner can create proposals
-  - Implement voting power calculation:
+  - DONE Implement voting power calculation:
     - DONE Direct TRO power
-    - LP-based TRO power
+    - DONE LP-based TRO power
   - DONE Add voting mechanism
   - DONE Add proposal lifecycle management
-  - WAIT Should users be allowed to only vote once or for full voting power? What if they stake more tokens in the pool? Should they be allowed to?
+  - DONE Should users be allowed to only vote once or for full voting power? What if they stake more tokens in the pool? Should they be allowed to?: Once and full power at voting time.
+
 
 TODO Analytics & Views
   - Add user stake information views
@@ -54,7 +55,7 @@ TODO Testing Framework
           - LP tokens $TRO power
     - Multiple LP pair scenarios
 
-WAIT Reward System
+SKIP Reward System - skipped because it was replaced with EGLD airdrop after voting
   - TRO rewards distribution
   - Reward calculation
   - Claiming mechanism

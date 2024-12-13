@@ -162,6 +162,7 @@ where
         Arg2: ProxyArg<BigUint<Env::Api>>,
         Arg3: ProxyArg<OptionalValue<u64>>,
         Arg4: ProxyArg<OptionalValue<u64>>,
+        Arg5: ProxyArg<MultiValueEncoded<Env::Api, MultiValue3<TokenIdentifier<Env::Api>, BigUint<Env::Api>, BigUint<Env::Api>>>>,
     >(
         self,
         title: Arg0,
@@ -169,6 +170,7 @@ where
         min_voting_power_to_validate_vote: Arg2,
         start_time: Arg3,
         end_time: Arg4,
+        lp_to_tro_ratios: Arg5,
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
         self.wrapped_tx
             .payment(NotPayable)
@@ -178,6 +180,7 @@ where
             .argument(&min_voting_power_to_validate_vote)
             .argument(&start_time)
             .argument(&end_time)
+            .argument(&lp_to_tro_ratios)
             .original_result()
     }
 
@@ -252,14 +255,17 @@ where
     }
 
     pub fn lp_to_tro_ratio<
-        Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
+        Arg0: ProxyArg<u64>,
+        Arg1: ProxyArg<TokenIdentifier<Env::Api>>,
     >(
         self,
-        lp_token: Arg0,
+        proposal_id: Arg0,
+        lp_token: Arg1,
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
         self.wrapped_tx
             .payment(NotPayable)
             .raw_call("getLpToTroRatio")
+            .argument(&proposal_id)
             .argument(&lp_token)
             .original_result()
     }

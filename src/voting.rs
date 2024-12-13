@@ -7,6 +7,11 @@ pub const DIVISION_GUARD: u64 = 1000000000000000000; // 1e18
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
+/// Representation of the lp_to_tro_ratio for a given lp token
+/// (lp_token_id, tro_pool_supply, lp_pool_supply)
+#[allow(type_alias_bounds)]
+pub type LpToTroRatio<M: ManagedTypeApi> = MultiValue3<TokenIdentifier<M>, BigUint<M>, BigUint<M>>;
+
 /// Representation of voting options
 /// Invalid it not considered a valid vote thus is being completely
 /// ignored from the voting validation logic
@@ -59,6 +64,7 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         min_voting_power_to_validate_vote: BigUint,
         start_time: OptionalValue<u64>,
         end_time: OptionalValue<u64>,
+        lp_to_tro_ratios: MultiValueEncoded<LpToTroRatio<Self::Api>>,
     ) {
         let proposal_id = self.get_new_proposal_id();
 
@@ -82,9 +88,7 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
             min_voting_power_to_validate_vote: min_voting_power_to_validate_vote.clone(),
         };
 
-        // TODO: compute lp_to_tro_ratio for each lp token here
-
-        self.snapshot_lp_to_tro_ratio(proposal_id);
+        self.snapshot_lp_to_tro_ratio(proposal_id, lp_to_tro_ratios);
 
         self.proposals(proposal_id).set(proposal);
 
@@ -114,11 +118,15 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         self.emit_vote_event(proposal_id, decision, &voting_power);
     }
 
-    fn snapshot_lp_to_tro_ratio(&self, proposal_id: u64) {
-        // TODO: implement this
-        for lp_token in self.whitelisted_lp_token_identifiers().iter() {
-            self.lp_to_tro_ratio(proposal_id, lp_token)
-                .set(BigUint::from(1u64));
+    fn snapshot_lp_to_tro_ratio(
+        &self,
+        proposal_id: u64,
+        lp_to_tro_ratios: MultiValueEncoded<LpToTroRatio<Self::Api>>,
+    ) {
+        for lp_to_tro_ratio in lp_to_tro_ratios {
+            let (lp_token_id, tro_pool_supply, lp_pool_supply) = lp_to_tro_ratio.into_tuple();
+            let ratio = tro_pool_supply * DIVISION_GUARD / lp_pool_supply;
+            self.lp_to_tro_ratio(proposal_id, lp_token_id).set(ratio);
         }
     }
 
