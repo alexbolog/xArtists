@@ -155,4 +155,173 @@ where
             .argument(&lp_token_identifiers)
             .original_result()
     }
+
+    pub fn create_proposal<
+        Arg0: ProxyArg<ManagedBuffer<Env::Api>>,
+        Arg1: ProxyArg<ManagedBuffer<Env::Api>>,
+        Arg2: ProxyArg<BigUint<Env::Api>>,
+        Arg3: ProxyArg<OptionalValue<u64>>,
+        Arg4: ProxyArg<OptionalValue<u64>>,
+    >(
+        self,
+        title: Arg0,
+        description: Arg1,
+        min_voting_power_to_validate_vote: Arg2,
+        start_time: Arg3,
+        end_time: Arg4,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("createProposal")
+            .argument(&title)
+            .argument(&description)
+            .argument(&min_voting_power_to_validate_vote)
+            .argument(&start_time)
+            .argument(&end_time)
+            .original_result()
+    }
+
+    pub fn vote<
+        Arg0: ProxyArg<u64>,
+        Arg1: ProxyArg<VoteDecision>,
+    >(
+        self,
+        proposal_id: Arg0,
+        decision: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("vote")
+            .argument(&proposal_id)
+            .argument(&decision)
+            .original_result()
+    }
+
+    pub fn last_proposal_id(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, u64> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getLastProposalId")
+            .original_result()
+    }
+
+    pub fn proposals<
+        Arg0: ProxyArg<u64>,
+    >(
+        self,
+        proposal_id: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, Proposal<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getProposals")
+            .argument(&proposal_id)
+            .original_result()
+    }
+
+    pub fn proposal_votes<
+        Arg0: ProxyArg<u64>,
+        Arg1: ProxyArg<VoteDecision>,
+    >(
+        self,
+        proposal_id: Arg0,
+        decision: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getProposalVotes")
+            .argument(&proposal_id)
+            .argument(&decision)
+            .original_result()
+    }
+
+    pub fn user_votes<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+        Arg1: ProxyArg<u64>,
+    >(
+        self,
+        user: Arg0,
+        proposal_id: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getUserVotes")
+            .argument(&user)
+            .argument(&proposal_id)
+            .original_result()
+    }
+
+    pub fn lp_to_tro_ratio<
+        Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
+    >(
+        self,
+        lp_token: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getLpToTroRatio")
+            .argument(&lp_token)
+            .original_result()
+    }
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode)]
+pub struct StakeEvent<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub caller: ManagedAddress<Api>,
+    pub payments: ManagedVec<Api, EsdtTokenPayment<Api>>,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode)]
+pub struct ProposalCreatedEvent<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub creator: ManagedAddress<Api>,
+    pub proposal_id: u64,
+    pub title: ManagedBuffer<Api>,
+    pub min_voting_power: BigUint<Api>,
+    pub start_time: u64,
+    pub end_time: u64,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub struct VoteEvent<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub voter: ManagedAddress<Api>,
+    pub proposal_id: u64,
+    pub decision: VoteDecision,
+    pub voting_power: BigUint<Api>,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub enum VoteDecision {
+    Invalid,
+    Approve,
+    Abstain,
+    Reject,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode)]
+pub struct Proposal<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub id: u64,
+    pub title: ManagedBuffer<Api>,
+    pub description: ManagedBuffer<Api>,
+    pub creator: ManagedAddress<Api>,
+    pub created_at: u64,
+    pub start_time: u64,
+    pub end_time: u64,
+    pub min_voting_power_to_validate_vote: BigUint<Api>,
 }

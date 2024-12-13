@@ -10,6 +10,7 @@ mod admin;
 mod events;
 mod stake;
 mod storage;
+pub mod voting;
 
 /// $TRO staking smart contract
 /// Users can stake $TRO and LP tokens in order to:
@@ -17,7 +18,11 @@ mod storage;
 /// - earn rewards? TODO: check with team
 #[multiversx_sc::contract]
 pub trait TroStaking:
-    storage::StorageModule + stake::StakeModule + admin::AdminModule + events::EventsModule
+    storage::StorageModule
+    + stake::StakeModule
+    + admin::AdminModule
+    + events::EventsModule
+    + voting::VotingModule
 {
     #[init]
     fn init(
@@ -27,6 +32,7 @@ pub trait TroStaking:
     ) {
         self.tro_token_identifier().set(tro_token_identifier);
         self.add_whitelisted_lp_tokens(lp_token_identifiers);
+        self.last_proposal_id().set(0);
     }
 
     #[payable("*")]
@@ -44,6 +50,9 @@ pub trait TroStaking:
     fn unstake(&self, request: MultiValueEncoded<MultiValue2<TokenIdentifier, BigUint>>) {
         let caller = self.blockchain().get_caller();
         let payments = self.process_unstake(&caller, request);
+
+        // Security: prevent unstake if there is an ongoing proposal
+        self.require_no_proposal_ongoing();
 
         self.send().direct_multi(&caller, &payments);
 

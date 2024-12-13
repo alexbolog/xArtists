@@ -10,11 +10,11 @@ TODO Core Staking Implementation
   - DONE Add storage for TRO and LP token stakes
   - DONE Implement stake functions
   - DONE Implement unstake functions
-  - Add unstake lock during active proposals
+  - DONE Add unstake lock during active proposals
   - Add events for all actions
     - DONE Stake/Unstake
-    - Vote
-    - Create Proposal
+    - DONE Vote
+    - DONE Create Proposal
 
 TODO External Pair Integration
   - Add MapMapper storage for TokenIdentifier -> PoolConfiguration
@@ -24,12 +24,14 @@ TODO External Pair Integration
   - Calculate TRO equivalent from LP tokens
 
 TODO Voting System
-  - Add proposal storage and creation
+  - DONE Add proposal storage and creation
+  - DONE Only owner can create proposals
   - Implement voting power calculation:
-    - Direct TRO power
+    - DONE Direct TRO power
     - LP-based TRO power
-  - Add voting mechanism
-  - Add proposal lifecycle management
+  - DONE Add voting mechanism
+  - DONE Add proposal lifecycle management
+  - WAIT Should users be allowed to only vote once or for full voting power? What if they stake more tokens in the pool? Should they be allowed to?
 
 TODO Analytics & Views
   - Add user stake information views
@@ -44,6 +46,12 @@ TODO Testing Framework
         - DONE Stake scenarios
         - DONE Unstake scenarios
     - Voting scenarios
+        - DONE Valid proposal creation
+        - DONE Valid voting action
+        - Valid proposal status
+        - Valid power calculation:
+          - $TRO power
+          - LP tokens $TRO power
     - Multiple LP pair scenarios
 
 WAIT Reward System

@@ -1,9 +1,10 @@
 use multiversx_sc_scenario::imports::*;
-use tro_staking::errors::ERR_INVALID_PAYMENT_TOKEN;
+use tro_staking::{
+    errors::ERR_INVALID_PAYMENT_TOKEN, voting::DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS,
+};
 
 use crate::config::{
-    LP_TOKEN_ID_1, LP_TOKEN_ID_2, LP_TOKEN_ID_3, SC_ADDRESS, TRO_TOKEN_ID, UNSUPPORTED_LP_TOKEN_ID,
-    USER_ADDRESS,
+    LP_TOKEN_ID_1, LP_TOKEN_ID_2, LP_TOKEN_ID_3, OWNER_ADDRESS, SC_ADDRESS, TRO_TOKEN_ID, UNSUPPORTED_LP_TOKEN_ID, USER_ADDRESS
 };
 
 use super::test_setup::setup_world_with_contract;
@@ -71,6 +72,44 @@ fn stake_many_should_succeed() {
         .typed(tro_staking::proxy::TroStakingProxy)
         .stake()
         .multi_esdt(payments)
+        .returns(ExpectStatus(0u64))
+        .run();
+}
+
+#[test]
+fn stake_with_active_proposal_should_succeed() {
+    let mut world = setup_world_with_contract();
+
+    world
+        .tx()
+        .from(OWNER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .create_proposal(
+            ManagedBuffer::new_from_bytes(b"title"),
+            ManagedBuffer::new_from_bytes(b"description"),
+            BigUint::from(1u64),
+            OptionalValue::<u64>::None,
+            OptionalValue::<u64>::None,
+        )
+        .returns(ExpectStatus(0u64))
+        .run();
+
+    world.set_state_step(
+        SetStateStep::new().block_timestamp(DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS + 1),
+    );
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .stake()
+        .payment(EsdtTokenPayment::new(
+            TRO_TOKEN_ID.to_token_identifier(),
+            0u64,
+            BigUint::from(1000u64),
+        ))
         .returns(ExpectStatus(0u64))
         .run();
 }

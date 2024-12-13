@@ -1,5 +1,8 @@
 use multiversx_sc_scenario::imports::*;
-use tro_staking::errors::ERR_INSUFFICIENT_STAKE;
+use tro_staking::{
+    errors::{ERR_INSUFFICIENT_STAKE, ERR_PROPOSAL_ACTIVE},
+    voting::DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS,
+};
 
 use crate::config::*;
 
@@ -240,6 +243,47 @@ fn unstaking_same_token_multiple_times_over_total_staked_should_fail() {
         .typed(tro_staking::proxy::TroStakingProxy)
         .unstake(unstake_args)
         .returns(ExpectMessage(ERR_INSUFFICIENT_STAKE))
+        .run();
+}
+
+#[test]
+fn unstake_should_fail_if_proposal_is_active() {
+    let mut world = setup_world_with_contract();
+
+    stake_token(&mut world, TRO_TOKEN_ID, 1000);
+
+    let mut unstake_args = MultiValueEncoded::new();
+    unstake_args.push(MultiValue2((
+        TRO_TOKEN_ID.to_token_identifier(),
+        BigUint::from(1000u64),
+    )));
+
+    world
+        .tx()
+        .from(OWNER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .create_proposal(
+            ManagedBuffer::new_from_bytes(b"title"),
+            ManagedBuffer::new_from_bytes(b"description"),
+            BigUint::from(1u64),
+            OptionalValue::<u64>::None,
+            OptionalValue::<u64>::None,
+        )
+        .returns(ExpectStatus(0u64))
+        .run();
+
+    world.set_state_step(
+        SetStateStep::new().block_timestamp(DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS + 1),
+    );
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .unstake(unstake_args)
+        .returns(ExpectMessage(ERR_PROPOSAL_ACTIVE))
         .run();
 }
 

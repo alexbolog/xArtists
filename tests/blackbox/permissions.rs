@@ -37,3 +37,29 @@ fn user_calling_add_whitelisted_lp_tokens_should_fail() {
         .returns(ExpectStatus(4u64))
         .run();
 }
+
+#[test]
+fn create_proposal_when_not_owner_should_fail() {
+    let mut world = setup_world_with_contract();
+
+    let title = ManagedBuffer::new_from_bytes(b"Test Proposal");
+    let description = ManagedBuffer::new_from_bytes(b"This is a test proposal");
+    let min_voting_power_to_validate_vote = BigUint::from(1000u64);
+    let start_time = OptionalValue::<u64>::None;
+    let end_time = OptionalValue::<u64>::None;
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .create_proposal(
+            title,
+            description,
+            min_voting_power_to_validate_vote,
+            start_time,
+            end_time,
+        )
+        .returns(ExpectStatus(4u64))
+        .run();
+}
