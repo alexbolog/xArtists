@@ -71,3 +71,17 @@ pub fn setup_world_with_contract() -> ScenarioWorld {
     );
     world
 }
+
+pub fn check_staked_amount(
+    world: &mut ScenarioWorld,
+    address: TestAddress,
+    token_id: TestTokenIdentifier,
+    expected_amount: u64,
+) {
+    let _ = world
+        .query()
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .users_stake(address, token_id)
+        .returns(ExpectValue(BigUint::from(expected_amount)));
+}

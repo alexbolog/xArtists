@@ -4,10 +4,11 @@ use tro_staking::{
 };
 
 use crate::config::{
-    LP_TOKEN_ID_1, LP_TOKEN_ID_2, LP_TOKEN_ID_3, OWNER_ADDRESS, SC_ADDRESS, TRO_TOKEN_ID, UNSUPPORTED_LP_TOKEN_ID, USER_ADDRESS
+    LP_TOKEN_ID_1, LP_TOKEN_ID_2, LP_TOKEN_ID_3, OWNER_ADDRESS, SC_ADDRESS, TRO_TOKEN_ID,
+    UNSUPPORTED_LP_TOKEN_ID, USER_ADDRESS,
 };
 
-use super::test_setup::setup_world_with_contract;
+use super::test_setup::{check_staked_amount, setup_world_with_contract};
 
 #[test]
 fn tro_stake_should_succeed() {
@@ -132,4 +133,31 @@ fn stake_unsupported_token_should_fail() {
         ))
         .returns(ExpectMessage(ERR_INVALID_PAYMENT_TOKEN))
         .run();
+}
+
+#[test]
+fn stake_should_update_staked_amount() {
+    let mut world = setup_world_with_contract();
+
+    let stake_amount = 1000u64;
+    let tokens = [TRO_TOKEN_ID, LP_TOKEN_ID_1, LP_TOKEN_ID_2, LP_TOKEN_ID_3];
+    for token_id in tokens {
+        for i in 0..10 {
+            world
+                .tx()
+                .from(USER_ADDRESS)
+                .to(SC_ADDRESS)
+                .typed(tro_staking::proxy::TroStakingProxy)
+                .stake()
+                .payment(EsdtTokenPayment::new(
+                    token_id.to_token_identifier(),
+                    0u64,
+                    BigUint::from(stake_amount),
+                ))
+                .returns(ExpectStatus(0u64))
+                .run();
+
+            check_staked_amount(&mut world, USER_ADDRESS, token_id, stake_amount * (i + 1));
+        }
+    }
 }

@@ -125,11 +125,15 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         self.proposal_votes(proposal_id, &decision)
             .update(|votes| *votes += &voting_power);
 
-        let vote_context = self
-            .get_proposal_vote_context(proposal_id, &caller)
-            .into_option()
-            .unwrap();
-        self.emit_vote_event(&caller, proposal_id, vote_context);
+        let vote_context = VoteContext {
+            decision,
+            voting_power,
+            timestamp: self.blockchain().get_block_timestamp(),
+            block: self.blockchain().get_block_nonce(),
+            epoch: self.blockchain().get_block_epoch(),
+        };
+
+        self.user_votes(&caller, proposal_id).set(vote_context);
     }
 
     fn get_proposal_vote_context(
