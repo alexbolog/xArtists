@@ -46,10 +46,10 @@ TODO Testing Framework
     - DONE Complete staking scenarios:
         - TODO Stake scenarios
           - DONE Basic stake functionality
-          - TODO power adjustment on stake
+          - DONE power adjustment on stake
         - TODO Unstake scenarios
           - DONE Basic unstake functionality
-          - TODO power adjustment on unstake
+          - DONE power adjustment on unstake
     - Voting scenarios
         - DONE Valid proposal creation
         - DONE Valid voting action

@@ -161,3 +161,34 @@ fn stake_should_update_staked_amount() {
         }
     }
 }
+
+#[test]
+fn batch_staking_should_update_staked_amount() {
+    let mut world = setup_world_with_contract();
+
+    let stake_amount = 1000u64;
+    let tokens = [TRO_TOKEN_ID, LP_TOKEN_ID_1, LP_TOKEN_ID_2, LP_TOKEN_ID_3];
+
+    let mut payments = MultiEsdtPayment::new();
+    for token_id in tokens {
+        payments.push(EsdtTokenPayment::new(
+            token_id.to_token_identifier(),
+            0u64,
+            BigUint::from(stake_amount),
+        ));
+    }
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .stake()
+        .multi_esdt(payments)
+        .returns(ExpectStatus(0u64))
+        .run();
+
+    for token_id in tokens {
+        check_staked_amount(&mut world, USER_ADDRESS, token_id, stake_amount * 10);
+    }
+}

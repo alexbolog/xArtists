@@ -6,7 +6,7 @@ use tro_staking::{
 
 use crate::config::*;
 
-use super::test_setup::setup_world_with_contract;
+use super::test_setup::{check_staked_amount, setup_world_with_contract};
 
 #[test]
 fn unstake_tro_should_succeed() {
@@ -302,4 +302,53 @@ fn stake_token(world: &mut ScenarioWorld, token_id: TestTokenIdentifier, amount:
         ))
         .returns(ExpectStatus(0u64))
         .run();
+}
+
+#[test]
+fn unstake_should_update_staked_amount() {
+    let mut world = setup_world_with_contract();
+
+    let token_ids = [TRO_TOKEN_ID, LP_TOKEN_ID_1, LP_TOKEN_ID_2, LP_TOKEN_ID_3];
+
+    for token_id in token_ids {
+        stake_token(&mut world, token_id, 1000);
+    }
+
+    for token_id in token_ids {
+        let mut unstake_args = MultiValueEncoded::new();
+        unstake_args.push(MultiValue2((
+            token_id.to_token_identifier(),
+            BigUint::from(1000u64),
+        )));
+
+        world
+            .tx()
+            .from(USER_ADDRESS)
+            .to(SC_ADDRESS)
+            .typed(tro_staking::proxy::TroStakingProxy)
+            .unstake(unstake_args)
+            .returns(ExpectStatus(0u64))
+            .run();
+
+        check_staked_amount(&mut world, USER_ADDRESS, TRO_TOKEN_ID, 0);
+
+        stake_token(&mut world, TRO_TOKEN_ID, 1000);
+
+        let mut unstake_args = MultiValueEncoded::new();
+        unstake_args.push(MultiValue2((
+            TRO_TOKEN_ID.to_token_identifier(),
+            BigUint::from(500u64),
+        )));
+
+        world
+            .tx()
+            .from(USER_ADDRESS)
+            .to(SC_ADDRESS)
+            .typed(tro_staking::proxy::TroStakingProxy)
+            .unstake(unstake_args)
+            .returns(ExpectStatus(0u64))
+            .run();
+
+        check_staked_amount(&mut world, USER_ADDRESS, TRO_TOKEN_ID, 500);
+    }
 }
