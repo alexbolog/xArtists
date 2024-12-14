@@ -6,7 +6,7 @@ DONE Project Setup
   - Setup dependencies
   - Add basic contract structure
 
-TODO Core Staking Implementation
+DONE Core Staking Implementation
   - DONE Add storage for TRO and LP token stakes
   - DONE Implement stake functions
   - DONE Implement unstake functions
@@ -40,23 +40,23 @@ DONE Analytics & Views
   - DONE Add voting power views
   - WAIT Add general statistics endpoints
 
-TODO Testing Framework
-  - Unit tests for core functions
-  - Integration tests:
+DONE Testing Framework
+  - DONE Unit tests for core functions
+  - DONE Integration tests:
     - DONE Complete staking scenarios:
-        - TODO Stake scenarios
+        - DONE Stake scenarios
           - DONE Basic stake functionality
           - DONE power adjustment on stake
-        - TODO Unstake scenarios
+        - DONE Unstake scenarios
           - DONE Basic unstake functionality
           - DONE power adjustment on unstake
     - Voting scenarios
         - DONE Valid proposal creation
         - DONE Valid voting action
-        - Valid proposal status
-        - Valid power calculation:
-          - $TRO power
-          - LP tokens $TRO power
+        - DONE Valid proposal status
+        - DONE Valid power calculation:
+          - DONE $TRO power
+          - DONE LP tokens $TRO power
     - SKIP Multiple LP pair scenarios - skipped because we're not going to integrate all the DEXes
 
 SKIP Reward System - skipped because it was replaced with EGLD airdrop after voting

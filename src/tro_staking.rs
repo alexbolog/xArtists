@@ -6,10 +6,10 @@ use multiversx_sc::imports::*;
 pub mod errors;
 pub mod proxy;
 
-mod admin;
+pub mod admin;
 mod events;
-mod stake;
 mod storage;
+pub mod stake;
 pub mod views;
 pub mod voting;
 

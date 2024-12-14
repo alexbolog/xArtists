@@ -123,7 +123,10 @@ pub trait ViewsModule:
 
         let mut last_proposal_id = self.last_proposal_id().get();
         while last_proposal_id > 0 {
-            let proposal_status = self.get_proposal_status(&self.proposals(last_proposal_id).get());
+            let proposal_status = self.get_proposal_status(
+                &self.proposals(last_proposal_id).get(),
+                self.blockchain().get_block_timestamp(),
+            );
             if proposal_status == ProposalStatus::Active {
                 active_proposal_ids.push(last_proposal_id);
             }
@@ -135,7 +138,10 @@ pub trait ViewsModule:
 
     #[view(getProposalStatus)]
     fn get_proposal_status_view(&self, proposal_id: u64) -> ProposalStatus {
-        self.get_proposal_status(&self.proposals(proposal_id).get())
+        self.get_proposal_status(
+            &self.proposals(proposal_id).get(),
+            self.blockchain().get_block_timestamp(),
+        )
     }
 
     #[view(getProposalVoteContext)]

@@ -23,7 +23,7 @@ pub enum VoteDecision {
     Reject = 3,
 }
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, TypeAbi)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, TypeAbi, Debug)]
 pub enum ProposalStatus {
     Invalid = 0,
     Pending = 1,
@@ -119,7 +119,16 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         self.require_proposal_active(proposal_id);
         self.require_user_has_not_voted(&caller, proposal_id);
 
-        let voting_power = self.get_voting_power(&caller, proposal_id);
+        self.process_vote(&caller, proposal_id, decision);
+    }
+
+    fn process_vote(
+        &self,
+        user: &ManagedAddress<Self::Api>,
+        proposal_id: u64,
+        decision: VoteDecision,
+    ) {
+        let voting_power = self.get_voting_power(user, proposal_id);
 
         require!(voting_power > 0, ERR_INSUFFICIENT_VOTING_POWER);
 
@@ -134,7 +143,7 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
             epoch: self.blockchain().get_block_epoch(),
         };
 
-        self.user_votes(&caller, proposal_id).set(vote_context);
+        self.user_votes(user, proposal_id).set(vote_context);
     }
 
     fn get_proposal_vote_context(
@@ -161,9 +170,11 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         }
     }
 
-    // TODO: add unit tests for this
-    fn get_proposal_status(&self, proposal: &Proposal<Self::Api>) -> ProposalStatus {
-        let block_timestamp = self.blockchain().get_block_timestamp();
+    fn get_proposal_status(
+        &self,
+        proposal: &Proposal<Self::Api>,
+        block_timestamp: u64,
+    ) -> ProposalStatus {
         if block_timestamp < proposal.start_time {
             ProposalStatus::Pending
         } else if block_timestamp > proposal.end_time {
@@ -186,7 +197,7 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
 
         let total_votes = &approve_votes + &reject_votes + &abstain_votes;
 
-        if total_votes > proposal.min_voting_power_to_validate_vote {
+        if total_votes >= proposal.min_voting_power_to_validate_vote {
             if approve_votes > reject_votes {
                 ProposalStatus::Approved
             } else {
@@ -245,8 +256,10 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
     }
 
     fn require_proposal_active(&self, proposal_id: u64) {
+        let block_timestamp = self.blockchain().get_block_timestamp();
         require!(
-            self.get_proposal_status(&self.proposals(proposal_id).get()) == ProposalStatus::Active,
+            self.get_proposal_status(&self.proposals(proposal_id).get(), block_timestamp)
+                == ProposalStatus::Active,
             ERR_PROPOSAL_NOT_ACTIVE
         );
     }
@@ -257,7 +270,10 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
             return;
         }
 
-        let last_proposal_status = self.get_proposal_status(&self.proposals(last_proposal).get());
+        let last_proposal_status = self.get_proposal_status(
+            &self.proposals(last_proposal).get(),
+            self.blockchain().get_block_timestamp(),
+        );
 
         require!(
             last_proposal_status != ProposalStatus::Active,
