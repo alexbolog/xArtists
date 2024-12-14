@@ -77,10 +77,11 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
         lp_to_tro_ratios: MultiValueEncoded<LpToTroRatio<Self::Api>>,
     ) {
         let proposal_id = self.get_new_proposal_id();
+        let block_timestamp = self.blockchain().get_block_timestamp();
 
-        let start_time = start_time.into_option().unwrap_or(
-            self.blockchain().get_block_timestamp() + DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS,
-        );
+        let start_time = start_time
+            .into_option()
+            .unwrap_or(block_timestamp + DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS);
         let end_time = end_time
             .into_option()
             .unwrap_or(start_time + DEFAULT_PROPOSAL_DURATION_IN_SECONDS);

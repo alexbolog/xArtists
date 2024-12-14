@@ -217,7 +217,7 @@ where
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, Proposal<Env::Api>> {
         self.wrapped_tx
             .payment(NotPayable)
-            .raw_call("getProposals")
+            .raw_call("getProposal")
             .argument(&proposal_id)
             .original_result()
     }
@@ -245,10 +245,10 @@ where
         self,
         user: Arg0,
         proposal_id: Arg1,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, VoteContext<Env::Api>> {
         self.wrapped_tx
             .payment(NotPayable)
-            .raw_call("getUserVotes")
+            .raw_call("getUserVote")
             .argument(&user)
             .argument(&proposal_id)
             .original_result()
@@ -269,6 +269,169 @@ where
             .argument(&lp_token)
             .original_result()
     }
+
+    pub fn get_voting_power_view<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+        Arg1: ProxyArg<OptionalValue<u64>>,
+    >(
+        self,
+        user: Arg0,
+        proposal_id: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getVotingPower")
+            .argument(&user)
+            .argument(&proposal_id)
+            .original_result()
+    }
+
+    pub fn get_staking_context<
+        Arg0: ProxyArg<OptionalValue<ManagedAddress<Env::Api>>>,
+    >(
+        self,
+        user: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, OptionalValue<StakingContext<Env::Api>>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getStakingContext")
+            .argument(&user)
+            .original_result()
+    }
+
+    pub fn get_user_complete_stake<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+    >(
+        self,
+        user: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ManagedVec<Env::Api, EsdtTokenPayment<Env::Api>>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getUserCompleteStake")
+            .argument(&user)
+            .original_result()
+    }
+
+    pub fn get_user_stake<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+        Arg1: ProxyArg<TokenIdentifier<Env::Api>>,
+    >(
+        self,
+        user: Arg0,
+        token_identifier: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, EsdtTokenPayment<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getUserStake")
+            .argument(&user)
+            .argument(&token_identifier)
+            .original_result()
+    }
+
+    pub fn get_proposal_context<
+        Arg0: ProxyArg<u64>,
+        Arg1: ProxyArg<OptionalValue<ManagedAddress<Env::Api>>>,
+    >(
+        self,
+        proposal_id: Arg0,
+        user: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ProposalContext<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getProposalContext")
+            .argument(&proposal_id)
+            .argument(&user)
+            .original_result()
+    }
+
+    pub fn get_active_proposal_ids(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ManagedVec<Env::Api, u64>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getActiveProposalIds")
+            .original_result()
+    }
+
+    pub fn get_proposal_status_view<
+        Arg0: ProxyArg<u64>,
+    >(
+        self,
+        proposal_id: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ProposalStatus> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getProposalStatus")
+            .argument(&proposal_id)
+            .original_result()
+    }
+
+    pub fn get_proposal_vote_context_view<
+        Arg0: ProxyArg<u64>,
+        Arg1: ProxyArg<ManagedAddress<Env::Api>>,
+    >(
+        self,
+        proposal_id: Arg0,
+        voter: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, OptionalValue<VoteContext<Env::Api>>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getProposalVoteContext")
+            .argument(&proposal_id)
+            .argument(&voter)
+            .original_result()
+    }
+
+    pub fn get_proposal_vote_count_view<
+        Arg0: ProxyArg<u64>,
+    >(
+        self,
+        proposal_id: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ProposalVoteCount<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getProposalVoteCount")
+            .argument(&proposal_id)
+            .original_result()
+    }
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub enum VoteDecision {
+    Invalid,
+    Approve,
+    Abstain,
+    Reject,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub struct Proposal<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub id: u64,
+    pub title: ManagedBuffer<Api>,
+    pub description: ManagedBuffer<Api>,
+    pub creator: ManagedAddress<Api>,
+    pub created_at: u64,
+    pub start_time: u64,
+    pub end_time: u64,
+    pub min_voting_power_to_validate_vote: BigUint<Api>,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub struct VoteContext<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub decision: VoteDecision,
+    pub voting_power: BigUint<Api>,
+    pub timestamp: u64,
+    pub block: u64,
+    pub epoch: u64,
 }
 
 #[type_abi]
@@ -297,37 +460,47 @@ where
 
 #[type_abi]
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
-pub struct VoteEvent<Api>
+pub struct StakingContext<Api>
 where
     Api: ManagedTypeApi,
 {
-    pub voter: ManagedAddress<Api>,
-    pub proposal_id: u64,
-    pub decision: VoteDecision,
-    pub voting_power: BigUint<Api>,
+    pub users_stake: ManagedVec<Api, EsdtTokenPayment<Api>>,
+    pub last_proposals_context: ProposalContext<Api>,
+    pub active_proposal_ids: ManagedVec<Api, u64>,
 }
 
 #[type_abi]
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
-pub enum VoteDecision {
-    Invalid,
-    Approve,
-    Abstain,
-    Reject,
-}
-
-#[type_abi]
-#[derive(TopEncode, TopDecode)]
-pub struct Proposal<Api>
+pub struct ProposalContext<Api>
 where
     Api: ManagedTypeApi,
 {
-    pub id: u64,
-    pub title: ManagedBuffer<Api>,
-    pub description: ManagedBuffer<Api>,
-    pub creator: ManagedAddress<Api>,
-    pub created_at: u64,
-    pub start_time: u64,
-    pub end_time: u64,
-    pub min_voting_power_to_validate_vote: BigUint<Api>,
+    pub proposal: Proposal<Api>,
+    pub users_voting_power: BigUint<Api>,
+    pub users_vote: Option<VoteContext<Api>>,
+    pub proposal_status: ProposalStatus,
+    pub proposal_vote_count: ProposalVoteCount<Api>,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub enum ProposalStatus {
+    Invalid,
+    Pending,
+    Active,
+    Approved,
+    Rejected,
+    Failed,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub struct ProposalVoteCount<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub approve: BigUint<Api>,
+    pub abstain: BigUint<Api>,
+    pub reject: BigUint<Api>,
+    pub invalid: BigUint<Api>,
 }

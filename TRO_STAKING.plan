@@ -57,7 +57,7 @@ TODO Testing Framework
         - Valid power calculation:
           - $TRO power
           - LP tokens $TRO power
-    - Multiple LP pair scenarios
+    - SKIP Multiple LP pair scenarios - skipped because we're not going to integrate all the DEXes
 
 SKIP Reward System - skipped because it was replaced with EGLD airdrop after voting
   - TRO rewards distribution
