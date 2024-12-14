@@ -285,6 +285,77 @@ fn voting_power_should_be_calculated_correctly() {
         .run();
 }
 
+#[test]
+fn voting_twice_on_same_proposal_should_fail() {
+    let mut world = setup_world_with_contract();
+
+    create_proposal(&mut world);
+    add_stake(&mut world, TRO_TOKEN_ID, 1000);
+
+    world.set_state_step(
+        SetStateStep::new().block_timestamp(DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS + 1),
+    );
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .vote(1u64, VoteDecision::Approve)
+        .returns(ExpectStatus(0u64))
+        .run();
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .vote(1u64, VoteDecision::Approve)
+        .returns(ExpectMessage(ERR_USER_ALREADY_VOTED))
+        .run();
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .vote(1u64, VoteDecision::Reject)
+        .returns(ExpectMessage(ERR_USER_ALREADY_VOTED))
+        .run();
+}
+
+#[test]
+fn voting_when_proposal_not_active_should_fail() {
+    let mut world = setup_world_with_contract();
+
+    create_proposal(&mut world);
+    add_stake(&mut world, TRO_TOKEN_ID, 1000);
+
+    world.set_state_step(SetStateStep::new().block_timestamp(1));
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .vote(1u64, VoteDecision::Approve)
+        .returns(ExpectMessage(ERR_PROPOSAL_NOT_ACTIVE))
+        .run();
+
+    world.set_state_step(SetStateStep::new().block_timestamp(
+        DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS + DEFAULT_PROPOSAL_DURATION_IN_SECONDS + 1,
+    ));
+
+    world
+        .tx()
+        .from(USER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(tro_staking::proxy::TroStakingProxy)
+        .vote(1u64, VoteDecision::Approve)
+        .returns(ExpectMessage(ERR_PROPOSAL_NOT_ACTIVE))
+        .run();
+}
+
 fn create_proposal(world: &mut ScenarioWorld) {
     let title = ManagedBuffer::new_from_bytes(PROPOSAL_TITLE);
     let description = ManagedBuffer::new_from_bytes(PROPOSAL_DESCRIPTION);
