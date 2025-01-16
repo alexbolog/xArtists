@@ -19,31 +19,30 @@ DONE Project Setup
 
 TODO Core Staking Implementation
   - Storage
-    - Staker info mapping (address => StakerInfo)
-    - Collection info mapping (collection => CollectionConfig)
-    - Global staking stats
-    - Total stake score tracking
+    - DONE Staker info mapping (address => StakerInfo)
+    - DONE Collection info mapping (collection => CollectionConfig)
+    - DONE Global staking stats
+    - DONE Total stake score tracking
   
   - Staking Logic
-    - Stake NFT/SFT function (single and batch)
-    - Unstake NFT/SFT function (single and batch)
-    - Emergency unstake function
-    - Collection registration/configuration
+    - DONE Stake NFT/SFT function (single and batch)
+    - DONE Unstake NFT/SFT function (single and batch)
+    - TODO Collection registration/configuration
     
   - Scoring System
-    - Base collection multiplier
-    - Individual NFT trait multipliers (optional)
-    - Score calculation function
+    - DONE Base collection multiplier
+    - SKIP Individual NFT trait multipliers (optional)
+    - DONE Score calculation function
 
 TODO Reward Distribution
   - Distribution Logic
-    - Daily reward pool configuration
-    - Reward accrual based on stake score
-    - Claim rewards function
+    - DONE Daily reward pool configuration
+    - DONE Reward accrual based on stake score
+    - DONE Claim rewards function
     
   - Distribution Mechanics
-    - User reward calculation formula
-    - Anti-gaming mechanisms
+    - DONE User reward calculation formula
+    - DONE Anti-gaming mechanisms
     
 TODO Analytics & Views
   - User stake information
@@ -56,3 +55,5 @@ TODO Testing Framework
   - Integration tests
   - Reward calculation tests
   - Edge cases and security tests
+
+TODO break logic into smaller modules
