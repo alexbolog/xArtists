@@ -1,8 +1,13 @@
 # Build artifacts
-/target
-/output
-/wasm
-/build
+nft-staking/target
+nft-staking/output
+nft-staking/wasm
+nft-staking/build
+
+tro-staking/target
+tro-staking/output
+tro-staking/wasm
+tro-staking/build
 
 # IDE specific files
 .idea/
