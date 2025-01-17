@@ -1,5 +1,5 @@
-use multiversx_sc::imports::*;
 use crate::constants::*;
+use multiversx_sc::imports::*;
 
 #[multiversx_sc::module]
 pub trait UtilsModule: crate::storage::StorageModule {
@@ -36,7 +36,7 @@ pub trait UtilsModule: crate::storage::StorageModule {
         amount: &BigUint,
     ) {
         require!(
-            &self.stake_info(user, token_id, nonce).get() >= amount,
+            &self.stake_quantity(user, token_id, nonce).get() >= amount,
             ERR_USER_HAS_NOT_ENOUGH_STAKED_BALANCE
         );
     }

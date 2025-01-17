@@ -15,8 +15,10 @@ pub trait CoreLogic: crate::storage::StorageModule + crate::utils::UtilsModule {
         for payment in payments.iter() {
             self.require_can_stake(&payment.token_identifier);
             total_score += self.get_payment_score(&payment);
-            self.stake_info(user, &payment.token_identifier, payment.token_nonce)
+            self.stake_quantity(user, &payment.token_identifier, payment.token_nonce)
                 .update(|prev| *prev += &payment.amount);
+            let staked_item = (payment.token_identifier.clone(), payment.token_nonce);
+            self.staked_items(user).insert(staked_item);
         }
 
         self.user_staked_score(user)
@@ -45,8 +47,16 @@ pub trait CoreLogic: crate::storage::StorageModule + crate::utils::UtilsModule {
             );
 
             total_score += self.get_payment_score(&payment);
-            self.stake_info(user, &payment.token_identifier, payment.token_nonce)
+            self.stake_quantity(user, &payment.token_identifier, payment.token_nonce)
                 .update(|prev| *prev -= &payment.amount);
+
+            if self
+                .stake_quantity(user, &payment.token_identifier, payment.token_nonce)
+                .is_empty()
+            {
+                let staked_item = (payment.token_identifier.clone(), payment.token_nonce);
+                self.staked_items(user).remove(&staked_item);
+            }
         }
 
         self.user_staked_score(user)

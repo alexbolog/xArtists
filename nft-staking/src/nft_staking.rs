@@ -8,6 +8,8 @@ pub mod core_logic;
 pub mod storage;
 pub mod utils;
 
+pub type StakedAssetIdentifier<M> = (TokenIdentifier<M>, u64);
+
 #[multiversx_sc::contract]
 pub trait NftStaking: storage::StorageModule + core_logic::CoreLogic + utils::UtilsModule {
     #[init]
@@ -67,5 +69,23 @@ pub trait NftStaking: storage::StorageModule + core_logic::CoreLogic + utils::Ut
     #[endpoint(enableStaking)]
     fn enable_staking(&self) {
         self.staking_disabled().set(false);
+    }
+
+    #[only_owner]
+    #[endpoint(allowCollections)]
+    fn allow_collections(&self, collections: MultiValueManagedVec<TokenIdentifier>) {
+        for collection in collections.into_vec().iter() {
+            self.allowed_nft_collections()
+                .insert(collection.clone_value());
+        }
+    }
+
+    #[only_owner]
+    #[endpoint(disallowCollections)]
+    fn disallow_collections(&self, collections: MultiValueManagedVec<TokenIdentifier>) {
+        for collection in collections.into_vec().iter() {
+            self.allowed_nft_collections()
+                .remove(&collection.clone_value());
+        }
     }
 }

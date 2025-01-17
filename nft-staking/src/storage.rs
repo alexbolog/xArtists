@@ -1,19 +1,26 @@
 use multiversx_sc::imports::*;
 
+use crate::StakedAssetIdentifier;
+
 #[multiversx_sc::module]
 pub trait StorageModule {
     #[view(getAllowedNftCollections)]
     #[storage_mapper("allowedNftCollections")]
     fn allowed_nft_collections(&self) -> SetMapper<TokenIdentifier>;
 
-    #[view(getStakeInfo)]
-    #[storage_mapper("stakeInfo")]
-    fn stake_info(
+    #[view(getStakeQuantity)]
+    #[storage_mapper("stakeQuantity")]
+    fn stake_quantity(
         &self,
         address: &ManagedAddress,
         token_id: &TokenIdentifier,
         nonce: u64,
     ) -> SingleValueMapper<BigUint>;
+
+    #[view(getStakedItems)]
+    #[storage_mapper("stakedItems")]
+    fn staked_items(&self, address: &ManagedAddress)
+        -> SetMapper<StakedAssetIdentifier<Self::Api>>;
 
     #[view(getUserStakedScore)]
     #[storage_mapper("userStakedScore")]
