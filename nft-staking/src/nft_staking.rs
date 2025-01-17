@@ -19,19 +19,21 @@ pub trait NftStaking: storage::StorageModule + core_logic::CoreLogic + utils::Ut
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
-        let caller = self.blockchain().get_caller();
         self.require_staking_enabled();
 
+        let caller = self.blockchain().get_caller();
         let payments = self.call_value().all_esdt_transfers();
+
         self.handle_stake(&caller, &payments);
     }
 
     #[endpoint(unstake)]
     fn unstake(&self, unstake_request: MultiValueManagedVec<EsdtTokenPayment>) {
-        let caller = self.blockchain().get_caller();
         self.require_staking_enabled();
 
+        let caller = self.blockchain().get_caller();
         let payments = unstake_request.into_vec();
+
         self.handle_unstake(&caller, &payments);
 
         self.send().direct_multi(&caller, &payments);
@@ -40,6 +42,9 @@ pub trait NftStaking: storage::StorageModule + core_logic::CoreLogic + utils::Ut
     #[endpoint(claimRewards)]
     fn claim_rewards(&self) {
         self.require_staking_enabled();
+
+        let caller = self.blockchain().get_caller();
+        self.handle_claim_rewards(&caller);
     }
 
     #[only_owner]
@@ -47,6 +52,9 @@ pub trait NftStaking: storage::StorageModule + core_logic::CoreLogic + utils::Ut
     #[endpoint(distributeRewards)]
     fn distribute_rewards(&self) {
         self.require_staking_enabled();
+
+        let payments = self.call_value().all_esdt_transfers();
+        self.handle_distribute_rewards(&payments);
     }
 
     #[only_owner]
