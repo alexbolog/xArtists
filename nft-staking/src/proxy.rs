@@ -150,7 +150,7 @@ where
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
         self.wrapped_tx
             .payment(NotPayable)
-            .raw_call("getStakeQuantity")
+            .raw_call("getStakeQuantityRaw")
             .argument(&address)
             .argument(&token_id)
             .argument(&nonce)
@@ -253,6 +253,25 @@ where
             .payment(NotPayable)
             .raw_call("getStakedItems")
             .argument(&address)
+            .original_result()
+    }
+
+    pub fn get_stake_quantity<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+        Arg1: ProxyArg<TokenIdentifier<Env::Api>>,
+        Arg2: ProxyArg<u64>,
+    >(
+        self,
+        address: Arg0,
+        token_id: Arg1,
+        nonce: Arg2,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getStakeQuantity")
+            .argument(&address)
+            .argument(&token_id)
+            .argument(&nonce)
             .original_result()
     }
 

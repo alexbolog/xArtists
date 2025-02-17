@@ -69,6 +69,16 @@ pub trait ViewsModule:
         }
         unstaking_items
     }
+
+    #[view(getStakeQuantity)]
+    fn get_stake_quantity(
+        &self,
+        address: &ManagedAddress,
+        token_id: &TokenIdentifier,
+        nonce: u64,
+    ) -> BigUint<Self::Api> {
+        self.stake_quantity(address, token_id, nonce).get()
+    }
 }
 
 #[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode)]

@@ -12,7 +12,7 @@ pub trait StorageModule {
     #[storage_mapper("rewardTokenIds")]
     fn reward_token_ids(&self) -> SetMapper<TokenIdentifier>;
 
-    #[view(getStakeQuantity)]
+    #[view(getStakeQuantityRaw)]
     #[storage_mapper("stakeQuantity")]
     fn stake_quantity(
         &self,
