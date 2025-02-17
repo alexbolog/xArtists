@@ -3,6 +3,7 @@
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
+pub mod admin;
 pub mod constants;
 pub mod core_logic;
 pub mod reward;
@@ -20,34 +21,44 @@ pub trait NftStaking:
     + views::ViewsModule
     + reward::reward_rate::RewardRateModule
     + reward::planned_distribution::PlannedDistributionModule
+    + admin::AdminModule
 {
     #[init]
-    fn init(&self) {}
+    fn init(&self) {
+        let unstake_penalty = 7 * 24 * 3600u64; // 7 days
+        self.set_unstaking_penalty(unstake_penalty);
+    }
 
     #[upgrade]
     fn upgrade(&self) {}
 
     #[payable("*")]
     #[endpoint(stake)]
-    fn stake(&self) {
+    fn stake(&self) -> BigUint {
         self.require_staking_enabled();
 
         let caller = self.blockchain().get_caller();
         let payments = self.call_value().all_esdt_transfers();
 
-        self.handle_stake(&caller, &payments);
+        self.handle_stake(&caller, &payments)
     }
 
     #[endpoint(unstake)]
-    fn unstake(&self, unstake_request: MultiValueManagedVec<EsdtTokenPayment>) {
+    fn unstake(&self, unstake_request: MultiValueManagedVec<EsdtTokenPayment>) -> BigUint {
         self.require_staking_enabled();
 
         let caller = self.blockchain().get_caller();
         let payments = unstake_request.into_vec();
 
-        self.handle_unstake(&caller, &payments);
+        self.handle_unstake(&caller, payments)
+    }
 
-        self.send().direct_multi(&caller, &payments);
+    #[endpoint(claimUnstaked)]
+    fn claim_unstaked(&self) {
+        self.require_staking_enabled();
+
+        let caller = self.blockchain().get_caller();
+        self.handle_claim_unstaked(&caller);
     }
 
     #[endpoint(claimRewards)]
@@ -56,45 +67,5 @@ pub trait NftStaking:
 
         let caller = self.blockchain().get_caller();
         self.handle_claim_rewards(&caller);
-    }
-
-    #[only_owner]
-    #[payable("*")]
-    #[endpoint(distributeRewards)]
-    fn distribute_rewards(&self) {
-        self.require_staking_enabled();
-
-        let payments = self.call_value().all_esdt_transfers();
-        self.handle_distribute_rewards(&payments);
-    }
-
-    #[only_owner]
-    #[endpoint(disableStaking)]
-    fn disable_staking(&self) {
-        self.staking_disabled().set(true);
-    }
-
-    #[only_owner]
-    #[endpoint(enableStaking)]
-    fn enable_staking(&self) {
-        self.staking_disabled().set(false);
-    }
-
-    #[only_owner]
-    #[endpoint(allowCollections)]
-    fn allow_collections(&self, collections: MultiValueManagedVec<TokenIdentifier>) {
-        for collection in collections.into_vec().iter() {
-            self.allowed_nft_collections()
-                .insert(collection.clone_value());
-        }
-    }
-
-    #[only_owner]
-    #[endpoint(disallowCollections)]
-    fn disallow_collections(&self, collections: MultiValueManagedVec<TokenIdentifier>) {
-        for collection in collections.into_vec().iter() {
-            self.allowed_nft_collections()
-                .remove(&collection.clone_value());
-        }
     }
 }

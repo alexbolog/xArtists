@@ -41,4 +41,15 @@ pub trait StorageModule {
     #[view(getStakingDisabled)]
     #[storage_mapper("stakingDisabled")]
     fn staking_disabled(&self) -> SingleValueMapper<bool>;
+
+    #[view(getUnstakingItemsRaw)]
+    #[storage_mapper("unstakingItems")]
+    fn unstaking_items(
+        &self,
+        address: &ManagedAddress,
+    ) -> SetMapper<(u64, ManagedVec<EsdtTokenPayment>)>;
+
+    #[view(getUnstakingPenalty)]
+    #[storage_mapper("unstakingPenalty")]
+    fn unstaking_penalty(&self) -> SingleValueMapper<u64>;
 }

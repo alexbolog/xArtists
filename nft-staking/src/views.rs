@@ -14,6 +14,7 @@ pub trait ViewsModule:
             staked_score: self.user_staked_score(address).get(),
             aggregated_staked_score: self.aggregated_staked_score().get(),
             pending_rewards: self.get_pending_rewards_view(address),
+            unstaking_items: self.get_unstaking_items(address),
         }
     }
 
@@ -56,6 +57,18 @@ pub trait ViewsModule:
 
         staked_items
     }
+
+    #[view(getUnstakingItems)]
+    fn get_unstaking_items(
+        &self,
+        address: &ManagedAddress,
+    ) -> ManagedVec<UnstakingBatch<Self::Api>> {
+        let mut unstaking_items = ManagedVec::new();
+        for (unstake_timestamp, unstake_items) in self.unstaking_items(address).iter() {
+            unstaking_items.push(UnstakingBatch::new(unstake_timestamp, unstake_items));
+        }
+        unstaking_items
+    }
 }
 
 #[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode)]
@@ -64,4 +77,20 @@ pub struct StakingInfo<M: ManagedTypeApi> {
     pub staked_score: BigUint<M>,
     pub aggregated_staked_score: BigUint<M>,
     pub pending_rewards: ManagedVec<M, EsdtTokenPayment<M>>,
+    pub unstaking_items: ManagedVec<M, UnstakingBatch<M>>,
+}
+
+#[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode, ManagedVecItem)]
+pub struct UnstakingBatch<M: ManagedTypeApi> {
+    pub unstake_timestamp: u64,
+    pub unstake_items: ManagedVec<M, EsdtTokenPayment<M>>,
+}
+
+impl<M: ManagedTypeApi> UnstakingBatch<M> {
+    pub fn new(unstake_timestamp: u64, unstake_items: ManagedVec<M, EsdtTokenPayment<M>>) -> Self {
+        Self {
+            unstake_timestamp,
+            unstake_items,
+        }
+    }
 }

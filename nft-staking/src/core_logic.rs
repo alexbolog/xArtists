@@ -33,7 +33,7 @@ pub trait CoreLogic:
     fn handle_unstake(
         &self,
         user: &ManagedAddress,
-        payments: &ManagedVec<EsdtTokenPayment>,
+        payments: ManagedVec<EsdtTokenPayment>,
     ) -> BigUint {
         self.handle_state_change(user);
 
@@ -62,7 +62,23 @@ pub trait CoreLogic:
 
         self.handle_decrease_staked_score(user, &total_score);
 
+        self.unstaking_items(user)
+            .insert((self.blockchain().get_block_timestamp(), payments));
+
         total_score
+    }
+
+    fn handle_claim_unstaked(&self, user: &ManagedAddress) {
+        let block_timestamp = self.blockchain().get_block_timestamp();
+        let unstake_penalty = self.unstaking_penalty().get();
+        for (unstake_timestamp, payments) in self.unstaking_items(user).iter() {
+            let time_passed = block_timestamp - unstake_timestamp;
+            if time_passed >= unstake_penalty {
+                self.send().direct_multi(user, &payments);
+                self.unstaking_items(user)
+                    .remove(&(unstake_timestamp, payments));
+            }
+        }
     }
 
     fn handle_claim_rewards(&self, user: &ManagedAddress) {
