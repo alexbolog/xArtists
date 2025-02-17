@@ -1,4 +1,5 @@
 use multiversx_sc_scenario::imports::*;
+use nft_staking::reward::reward_rate::REWARD_RATE_DENOMINATION;
 
 pub const SC_ADDRESS: TestSCAddress = TestSCAddress::new("sc");
 pub const OWNER_ADDRESS: TestAddress = TestAddress::new("owner");

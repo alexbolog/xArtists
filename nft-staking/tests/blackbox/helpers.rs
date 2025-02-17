@@ -45,6 +45,21 @@ pub fn check_aggregated_staking_score(world: &mut ScenarioWorld, expected_score:
         .returns(ExpectValue(expected_score));
 }
 
+pub fn check_distribution_amount_per_round(
+    world: &mut ScenarioWorld,
+    start_round: u64,
+    end_round: u64,
+    total_distribution_amount: u64,
+    expected_amount_per_round: u64,
+) {
+    let _ = world
+        .query()
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .get_amount_per_round(start_round, end_round, total_distribution_amount)
+        .returns(ExpectValue(expected_amount_per_round));
+}
+
 ////////////////////////////////////////////////////////////
 /// Transaction Helpers
 ////////////////////////////////////////////////////////////
@@ -110,7 +125,7 @@ pub fn send_stake_tx(
         payments_arg.push(EsdtTokenPayment::new(
             token_id.to_token_identifier(),
             *nonce,
-            BigUint::from(*amount),
+            managed_biguint!(*amount),
         ));
     }
 
@@ -136,7 +151,7 @@ pub fn send_unstake_tx(
         assets_arg.push(EsdtTokenPayment::new(
             token_id.to_token_identifier(),
             *nonce,
-            BigUint::from(*amount),
+            managed_biguint!(*amount),
         ));
     }
 
@@ -147,5 +162,77 @@ pub fn send_unstake_tx(
         .typed(nft_staking::proxy::NftStakingProxy)
         .unstake(assets_arg)
         .returns(ExpectStatus(0u64))
+        .run();
+}
+
+pub fn send_set_collection_score_tx(
+    world: &mut ScenarioWorld,
+    token_id: &TestTokenIdentifier,
+    score: u64,
+) {
+    world
+        .tx()
+        .from(OWNER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .set_collection_score(token_id.to_token_identifier(), score)
+        .returns(ExpectStatus(0u64))
+        .run();
+}
+
+pub fn send_set_collection_nonce_score_tx(
+    world: &mut ScenarioWorld,
+    token_id: &TestTokenIdentifier,
+    nonce: u64,
+    score: u64,
+) {
+    world
+        .tx()
+        .from(OWNER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .set_collection_nonce_score(token_id.to_token_identifier(), nonce, score)
+        .returns(ExpectStatus(0u64))
+        .run();
+}
+
+pub fn send_distribute_rewards_tx(
+    world: &mut ScenarioWorld,
+    token_id: &TestTokenIdentifier,
+    amount: u64,
+) {
+    world
+        .tx()
+        .from(OWNER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .distribute_rewards()
+        .with_esdt_transfer(EsdtTokenPayment::new(
+            token_id.to_token_identifier(),
+            0u64,
+            managed_biguint!(amount),
+        ))
+        .returns(ExpectStatus(0u64))
+        .run();
+}
+
+pub fn send_set_distribution_plan_tx(
+    world: &mut ScenarioWorld,
+    token_id: TestTokenIdentifier,
+    start_round: u64,
+    end_round: u64,
+    total_amount: u64,
+) {
+    world
+        .tx()
+        .from(OWNER_ADDRESS)
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .create_distribution_plan(start_round, end_round)
+        .with_esdt_transfer(EsdtTokenPayment::new(
+            token_id.to_token_identifier(),
+            0u64,
+            managed_biguint!(total_amount),
+        ))
         .run();
 }

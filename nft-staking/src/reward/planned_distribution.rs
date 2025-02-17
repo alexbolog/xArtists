@@ -14,9 +14,19 @@ pub trait PlannedDistributionModule: super::reward_rate::RewardRateModule {
         total_distribution_amount: BigUint,
     ) {
         let amount_per_round =
-            total_distribution_amount * REWARD_RATE_DENOMINATION / (end_round - start_round);
+            self.get_amount_per_round(start_round, end_round, total_distribution_amount);
         self.distribution_plans()
             .insert((token, start_round, end_round, amount_per_round));
+    }
+
+    #[view(getDistributionAmountPerRound)]
+    fn get_amount_per_round(
+        &self,
+        start_round: u64,
+        end_round: u64,
+        total_distribution_amount: BigUint,
+    ) -> BigUint {
+        total_distribution_amount * REWARD_RATE_DENOMINATION / (end_round - start_round)
     }
 
     fn remove_plan(
@@ -24,9 +34,9 @@ pub trait PlannedDistributionModule: super::reward_rate::RewardRateModule {
         token: TokenIdentifier,
         start_round: u64,
         end_round: u64,
-        total_distribution_amount: BigUint,
+        amount_per_round: BigUint,
     ) {
-        let plan = (token, start_round, end_round, total_distribution_amount);
+        let plan = (token, start_round, end_round, amount_per_round);
 
         if let Some(amount) =
             self.get_amount_to_distribute(&plan, self.blockchain().get_block_round())
@@ -107,11 +117,11 @@ pub trait PlannedDistributionModule: super::reward_rate::RewardRateModule {
         rewards
     }
 
-    #[view(getLastDistributionRound)]
+    #[view(getLastDistributionRoundRaw)]
     #[storage_mapper("lastDistributionRound")]
     fn last_distribution_round(&self) -> SingleValueMapper<u64>;
 
-    #[view(getDistributionPlan)]
+    #[view(getDistributionPlanRaw)]
     #[storage_mapper("distributionPlans")]
     fn distribution_plans(&self) -> SetMapper<DistributionPlan<Self::Api>>;
 }

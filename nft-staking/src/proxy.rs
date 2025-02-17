@@ -297,6 +297,15 @@ where
             .original_result()
     }
 
+    pub fn get_last_distribution_round(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, u64> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getLastDistributionRound")
+            .original_result()
+    }
+
     pub fn user_staked_score<
         Arg0: ProxyArg<ManagedAddress<Env::Api>>,
     >(
@@ -377,12 +386,31 @@ where
             .original_result()
     }
 
+    pub fn get_amount_per_round<
+        Arg0: ProxyArg<u64>,
+        Arg1: ProxyArg<u64>,
+        Arg2: ProxyArg<BigUint<Env::Api>>,
+    >(
+        self,
+        start_round: Arg0,
+        end_round: Arg1,
+        total_distribution_amount: Arg2,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getDistributionAmountPerRound")
+            .argument(&start_round)
+            .argument(&end_round)
+            .argument(&total_distribution_amount)
+            .original_result()
+    }
+
     pub fn last_distribution_round(
         self,
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, u64> {
         self.wrapped_tx
             .payment(NotPayable)
-            .raw_call("getLastDistributionRound")
+            .raw_call("getLastDistributionRoundRaw")
             .original_result()
     }
 
@@ -391,7 +419,7 @@ where
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, MultiValueEncoded<Env::Api, (TokenIdentifier<Env::Api>, u64, u64, BigUint<Env::Api>)>> {
         self.wrapped_tx
             .payment(NotPayable)
-            .raw_call("getDistributionPlan")
+            .raw_call("getDistributionPlanRaw")
             .original_result()
     }
 
@@ -462,25 +490,57 @@ where
             .original_result()
     }
 
-    pub fn create_distribution_plan<
+    /// Careful with this function. It will set the score for all NFTs in the collection. 
+    /// This will *NOT* update the score for already staked NFTs. 
+    pub fn set_collection_score<
         Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
         Arg1: ProxyArg<u64>,
-        Arg2: ProxyArg<u64>,
-        Arg3: ProxyArg<BigUint<Env::Api>>,
     >(
         self,
-        reward_token_id: Arg0,
-        start_round: Arg1,
-        end_round: Arg2,
-        total_distribution_amount: Arg3,
+        collection: Arg0,
+        score: Arg1,
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
         self.wrapped_tx
             .payment(NotPayable)
+            .raw_call("setCollectionScore")
+            .argument(&collection)
+            .argument(&score)
+            .original_result()
+    }
+
+    /// Careful with this function. It will set the score for all NFTs in the collection. 
+    /// This will *NOT* update the score for already staked NFTs. 
+    pub fn set_collection_nonce_score<
+        Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
+        Arg1: ProxyArg<u64>,
+        Arg2: ProxyArg<u64>,
+    >(
+        self,
+        collection: Arg0,
+        nonce: Arg1,
+        score: Arg2,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("setCollectionNonceScore")
+            .argument(&collection)
+            .argument(&nonce)
+            .argument(&score)
+            .original_result()
+    }
+
+    pub fn create_distribution_plan<
+        Arg0: ProxyArg<u64>,
+        Arg1: ProxyArg<u64>,
+    >(
+        self,
+        start_round: Arg0,
+        end_round: Arg1,
+    ) -> TxTypedCall<Env, From, To, (), Gas, ()> {
+        self.wrapped_tx
             .raw_call("createDistributionPlan")
-            .argument(&reward_token_id)
             .argument(&start_round)
             .argument(&end_round)
-            .argument(&total_distribution_amount)
             .original_result()
     }
 
@@ -494,7 +554,7 @@ where
         reward_token_id: Arg0,
         start_round: Arg1,
         end_round: Arg2,
-        total_distribution_amount: Arg3,
+        amount_per_round: Arg3,
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
         self.wrapped_tx
             .payment(NotPayable)
@@ -502,7 +562,7 @@ where
             .argument(&reward_token_id)
             .argument(&start_round)
             .argument(&end_round)
-            .argument(&total_distribution_amount)
+            .argument(&amount_per_round)
             .original_result()
     }
 }

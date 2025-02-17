@@ -89,6 +89,11 @@ pub trait ViewsModule:
     fn get_aggregated_staking_score(&self) -> BigUint<Self::Api> {
         self.aggregated_staked_score().get()
     }
+
+    #[view(getLastDistributionRound)]
+    fn get_last_distribution_round(&self) -> u64 {
+        self.last_distribution_round().get()
+    }
 }
 
 #[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode)]

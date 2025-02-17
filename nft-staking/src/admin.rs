@@ -56,20 +56,34 @@ pub trait AdminModule:
         self.unstaking_penalty().set(penalty);
     }
 
+    /// Careful with this function. It will set the score for all NFTs in the collection.
+    /// This will *NOT* update the score for already staked NFTs.
+    #[only_owner]
+    #[endpoint(setCollectionScore)]
+    fn set_collection_score(&self, collection: TokenIdentifier, score: u64) {
+        self.nft_collection_score(&collection)
+            .set(BigUint::from(score));
+    }
+
+    /// Careful with this function. It will set the score for all NFTs in the collection.
+    /// This will *NOT* update the score for already staked NFTs.
+    #[only_owner]
+    #[endpoint(setCollectionNonceScore)]
+    fn set_collection_nonce_score(&self, collection: TokenIdentifier, nonce: u64, score: u64) {
+        self.nft_collection_nonce_score(&collection, nonce)
+            .set(BigUint::from(score));
+    }
+
+    #[payable("*")]
     #[only_owner]
     #[endpoint(createDistributionPlan)]
-    fn create_distribution_plan(
-        &self,
-        reward_token_id: TokenIdentifier,
-        start_round: u64,
-        end_round: u64,
-        total_distribution_amount: BigUint,
-    ) {
+    fn create_distribution_plan(&self, start_round: u64, end_round: u64) {
+        let payment = self.call_value().single_esdt();
         self.create_plan(
-            reward_token_id,
+            payment.token_identifier,
             start_round,
             end_round,
-            total_distribution_amount,
+            payment.amount,
         );
     }
 
@@ -80,13 +94,13 @@ pub trait AdminModule:
         reward_token_id: TokenIdentifier,
         start_round: u64,
         end_round: u64,
-        total_distribution_amount: BigUint,
+        amount_per_round: BigUint,
     ) {
         self.remove_plan(
             reward_token_id,
             start_round,
             end_round,
-            total_distribution_amount,
+            amount_per_round,
         );
     }
 }
