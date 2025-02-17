@@ -1,5 +1,7 @@
 use multiversx_sc::imports::*;
 
+use crate::constants::ERR_NO_UNSTAKED_ITEMS;
+
 #[multiversx_sc::module]
 pub trait CoreLogic:
     crate::storage::StorageModule
@@ -71,14 +73,19 @@ pub trait CoreLogic:
     fn handle_claim_unstaked(&self, user: &ManagedAddress) {
         let block_timestamp = self.blockchain().get_block_timestamp();
         let unstake_penalty = self.unstaking_penalty().get();
+        let mut has_unstaked = false;
+
         for (unstake_timestamp, payments) in self.unstaking_items(user).iter() {
             let time_passed = block_timestamp - unstake_timestamp;
             if time_passed >= unstake_penalty {
                 self.send().direct_multi(user, &payments);
                 self.unstaking_items(user)
                     .remove(&(unstake_timestamp, payments));
+                has_unstaked = true;
             }
         }
+
+        require!(has_unstaked, ERR_NO_UNSTAKED_ITEMS);
     }
 
     fn handle_claim_rewards(&self, user: &ManagedAddress) {
