@@ -5,13 +5,22 @@ use multiversx_sc::imports::*;
 
 pub mod constants;
 pub mod core_logic;
+pub mod reward;
 pub mod storage;
 pub mod utils;
+pub mod views;
 
 pub type StakedAssetIdentifier<M> = (TokenIdentifier<M>, u64);
 
 #[multiversx_sc::contract]
-pub trait NftStaking: storage::StorageModule + core_logic::CoreLogic + utils::UtilsModule {
+pub trait NftStaking:
+    storage::StorageModule
+    + core_logic::CoreLogic
+    + utils::UtilsModule
+    + views::ViewsModule
+    + reward::reward_rate::RewardRateModule
+    + reward::planned_distribution::PlannedDistributionModule
+{
     #[init]
     fn init(&self) {}
 

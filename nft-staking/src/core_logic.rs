@@ -1,14 +1,18 @@
-use crate::constants::*;
 use multiversx_sc::imports::*;
 
 #[multiversx_sc::module]
-pub trait CoreLogic: crate::storage::StorageModule + crate::utils::UtilsModule {
+pub trait CoreLogic:
+    crate::storage::StorageModule
+    + crate::utils::UtilsModule
+    + crate::reward::reward_rate::RewardRateModule
+    + crate::reward::planned_distribution::PlannedDistributionModule
+{
     fn handle_stake(
         &self,
         user: &ManagedAddress,
         payments: &ManagedVec<EsdtTokenPayment>,
     ) -> BigUint {
-        self.handle_store_pending_rewards(user);
+        self.handle_state_change(user);
 
         let mut total_score = BigUint::zero();
 
@@ -21,10 +25,7 @@ pub trait CoreLogic: crate::storage::StorageModule + crate::utils::UtilsModule {
             self.staked_items(user).insert(staked_item);
         }
 
-        self.user_staked_score(user)
-            .update(|prev| *prev += &total_score);
-        self.aggregated_staked_score()
-            .update(|prev| *prev += &total_score);
+        self.handle_increase_staked_score(user, &total_score);
 
         total_score
     }
@@ -34,7 +35,7 @@ pub trait CoreLogic: crate::storage::StorageModule + crate::utils::UtilsModule {
         user: &ManagedAddress,
         payments: &ManagedVec<EsdtTokenPayment>,
     ) -> BigUint {
-        self.handle_store_pending_rewards(user);
+        self.handle_state_change(user);
 
         let mut total_score = BigUint::zero();
 
@@ -59,48 +60,34 @@ pub trait CoreLogic: crate::storage::StorageModule + crate::utils::UtilsModule {
             }
         }
 
-        self.user_staked_score(user)
-            .update(|prev| *prev -= &total_score);
-        self.aggregated_staked_score()
-            .update(|prev| *prev -= &total_score);
+        self.handle_decrease_staked_score(user, &total_score);
 
         total_score
     }
 
     fn handle_claim_rewards(&self, user: &ManagedAddress) {
-        self.handle_store_pending_rewards(user);
-
+        self.handle_state_change(user);
+        let mut reward_payments = ManagedVec::new();
         for reward_token_id in self.reward_token_ids().iter() {
-            let rewards = self.user_stored_rewards(user, &reward_token_id).get();
-            if rewards == 0 {
-                continue;
+            let reward_payment = self.handle_claim_pending_rewards(user, reward_token_id);
+            if let Some(reward_payment) = reward_payment {
+                reward_payments.push(reward_payment);
             }
-
-            self.user_stored_rewards(user, &reward_token_id).clear();
-
-            self.send().direct_esdt(user, &reward_token_id, 0, &rewards);
         }
+
+        self.send().direct_multi(user, &reward_payments);
     }
 
-    fn handle_store_pending_rewards(&self, user: &ManagedAddress) {
+    /// This function is called when any user's state changes.
+    /// It distributes rewards as planned and stores pending rewards.
+    fn handle_state_change(&self, user: &ManagedAddress) {
+        self.distribute_as_planned();
+        self.handle_store_all_pending_rewards(user);
+    }
+
+    fn handle_store_all_pending_rewards(&self, user: &ManagedAddress) {
         for reward_token_id in self.reward_token_ids().iter() {
-            let current_rate = self.current_reward_rate(&reward_token_id).get();
-            let user_rate = match self.user_reward_rate(user, &reward_token_id).is_empty() {
-                true => BigUint::zero(), // TODO: check if this is correct, maybe should it be one?
-                false => self.user_reward_rate(user, &reward_token_id).get(),
-            };
-
-            let rate_diff = &current_rate - &user_rate;
-            if rate_diff == 0 {
-                continue;
-            }
-
-            let rewards = rate_diff * self.user_staked_score(user).get() / REWARD_RATE_DENOMINATION;
-
-            self.user_stored_rewards(user, &reward_token_id)
-                .update(|prev| *prev += &rewards);
-            self.user_reward_rate(user, &reward_token_id)
-                .set(current_rate);
+            self.handle_store_pending_rewards(user, &reward_token_id);
         }
     }
 
@@ -111,12 +98,7 @@ pub trait CoreLogic: crate::storage::StorageModule + crate::utils::UtilsModule {
                     .insert(payment.token_identifier.clone());
             }
 
-            let aggregated_stake_score = self.aggregated_staked_score().get();
-            let distribution_rate_increase =
-                &payment.amount * REWARD_RATE_DENOMINATION / &aggregated_stake_score;
-
-            self.current_reward_rate(&payment.token_identifier)
-                .update(|prev| *prev += &distribution_rate_increase);
+            self.handle_increase_reward_rate_from_payment(&payment);
         }
     }
 }
