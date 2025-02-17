@@ -6,6 +6,7 @@ use multiversx_sc::imports::*;
 pub mod admin;
 pub mod constants;
 pub mod core_logic;
+pub mod proxy;
 pub mod reward;
 pub mod storage;
 pub mod utils;

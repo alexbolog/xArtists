@@ -83,7 +83,7 @@ where
 {
     pub fn stake(
         self,
-    ) -> TxTypedCall<Env, From, To, (), Gas, ()> {
+    ) -> TxTypedCall<Env, From, To, (), Gas, BigUint<Env::Api>> {
         self.wrapped_tx
             .raw_call("stake")
             .original_result()
@@ -94,11 +94,20 @@ where
     >(
         self,
         unstake_request: Arg0,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
         self.wrapped_tx
             .payment(NotPayable)
             .raw_call("unstake")
             .argument(&unstake_request)
+            .original_result()
+    }
+
+    pub fn claim_unstaked(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("claimUnstaked")
             .original_result()
     }
 
@@ -108,58 +117,6 @@ where
         self.wrapped_tx
             .payment(NotPayable)
             .raw_call("claimRewards")
-            .original_result()
-    }
-
-    pub fn distribute_rewards(
-        self,
-    ) -> TxTypedCall<Env, From, To, (), Gas, ()> {
-        self.wrapped_tx
-            .raw_call("distributeRewards")
-            .original_result()
-    }
-
-    pub fn disable_staking(
-        self,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
-        self.wrapped_tx
-            .payment(NotPayable)
-            .raw_call("disableStaking")
-            .original_result()
-    }
-
-    pub fn enable_staking(
-        self,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
-        self.wrapped_tx
-            .payment(NotPayable)
-            .raw_call("enableStaking")
-            .original_result()
-    }
-
-    pub fn allow_collections<
-        Arg0: ProxyArg<MultiValueManagedVec<Env::Api, TokenIdentifier<Env::Api>>>,
-    >(
-        self,
-        collections: Arg0,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
-        self.wrapped_tx
-            .payment(NotPayable)
-            .raw_call("allowCollections")
-            .argument(&collections)
-            .original_result()
-    }
-
-    pub fn disallow_collections<
-        Arg0: ProxyArg<MultiValueManagedVec<Env::Api, TokenIdentifier<Env::Api>>>,
-    >(
-        self,
-        collections: Arg0,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
-        self.wrapped_tx
-            .payment(NotPayable)
-            .raw_call("disallowCollections")
-            .argument(&collections)
             .original_result()
     }
 
@@ -251,16 +208,25 @@ where
             .original_result()
     }
 
-    pub fn get_staking_info<
+    pub fn unstaking_items<
         Arg0: ProxyArg<ManagedAddress<Env::Api>>,
     >(
         self,
         address: Arg0,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, StakingInfo<Env::Api>> {
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, MultiValueEncoded<Env::Api, (u64, ManagedVec<Env::Api, EsdtTokenPayment<Env::Api>>)>> {
         self.wrapped_tx
             .payment(NotPayable)
-            .raw_call("getStakingInfo")
+            .raw_call("getUnstakingItemsRaw")
             .argument(&address)
+            .original_result()
+    }
+
+    pub fn unstaking_penalty(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, u64> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getUnstakingPenalty")
             .original_result()
     }
 
@@ -387,16 +353,113 @@ where
             .raw_call("getDistributionPlan")
             .original_result()
     }
-}
 
-#[type_abi]
-#[derive(TopEncode, TopDecode)]
-pub struct StakingInfo<Api>
-where
-    Api: ManagedTypeApi,
-{
-    pub staked_items: ManagedVec<Api, EsdtTokenPayment<Api>>,
-    pub staked_score: BigUint<Api>,
-    pub aggregated_staked_score: BigUint<Api>,
-    pub pending_rewards: ManagedVec<Api, EsdtTokenPayment<Api>>,
+    pub fn disable_staking(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("disableStaking")
+            .original_result()
+    }
+
+    pub fn enable_staking(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("enableStaking")
+            .original_result()
+    }
+
+    pub fn allow_collections<
+        Arg0: ProxyArg<MultiValueManagedVec<Env::Api, TokenIdentifier<Env::Api>>>,
+    >(
+        self,
+        collections: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("allowCollections")
+            .argument(&collections)
+            .original_result()
+    }
+
+    pub fn disallow_collections<
+        Arg0: ProxyArg<MultiValueManagedVec<Env::Api, TokenIdentifier<Env::Api>>>,
+    >(
+        self,
+        collections: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("disallowCollections")
+            .argument(&collections)
+            .original_result()
+    }
+
+    pub fn distribute_rewards(
+        self,
+    ) -> TxTypedCall<Env, From, To, (), Gas, ()> {
+        self.wrapped_tx
+            .raw_call("distributeRewards")
+            .original_result()
+    }
+
+    pub fn set_unstaking_penalty<
+        Arg0: ProxyArg<u64>,
+    >(
+        self,
+        penalty: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("setUnstakingPenalty")
+            .argument(&penalty)
+            .original_result()
+    }
+
+    pub fn create_distribution_plan<
+        Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
+        Arg1: ProxyArg<u64>,
+        Arg2: ProxyArg<u64>,
+        Arg3: ProxyArg<BigUint<Env::Api>>,
+    >(
+        self,
+        reward_token_id: Arg0,
+        start_round: Arg1,
+        end_round: Arg2,
+        total_distribution_amount: Arg3,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("createDistributionPlan")
+            .argument(&reward_token_id)
+            .argument(&start_round)
+            .argument(&end_round)
+            .argument(&total_distribution_amount)
+            .original_result()
+    }
+
+    pub fn remove_distribution_plan<
+        Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
+        Arg1: ProxyArg<u64>,
+        Arg2: ProxyArg<u64>,
+        Arg3: ProxyArg<BigUint<Env::Api>>,
+    >(
+        self,
+        reward_token_id: Arg0,
+        start_round: Arg1,
+        end_round: Arg2,
+        total_distribution_amount: Arg3,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ()> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("removeDistributionPlan")
+            .argument(&reward_token_id)
+            .argument(&start_round)
+            .argument(&end_round)
+            .argument(&total_distribution_amount)
+            .original_result()
+    }
 }
