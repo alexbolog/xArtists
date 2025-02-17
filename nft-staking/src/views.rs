@@ -79,6 +79,16 @@ pub trait ViewsModule:
     ) -> BigUint<Self::Api> {
         self.stake_quantity(address, token_id, nonce).get()
     }
+
+    #[view(getUserStakingScore)]
+    fn get_user_staking_score(&self, address: &ManagedAddress) -> BigUint<Self::Api> {
+        self.user_staked_score(address).get()
+    }
+
+    #[view(getAggregatedStakingScore)]
+    fn get_aggregated_staking_score(&self) -> BigUint<Self::Api> {
+        self.aggregated_staked_score().get()
+    }
 }
 
 #[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode)]

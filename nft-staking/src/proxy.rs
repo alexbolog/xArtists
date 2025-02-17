@@ -275,6 +275,28 @@ where
             .original_result()
     }
 
+    pub fn get_user_staking_score<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+    >(
+        self,
+        address: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getUserStakingScore")
+            .argument(&address)
+            .original_result()
+    }
+
+    pub fn get_aggregated_staking_score(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getAggregatedStakingScore")
+            .original_result()
+    }
+
     pub fn user_staked_score<
         Arg0: ProxyArg<ManagedAddress<Env::Api>>,
     >(
@@ -404,6 +426,8 @@ where
             .original_result()
     }
 
+    /// I don't recommend using this function as it won't update user's storage. 
+    /// Its effect as of now is to stop other users from staking NFTs from the given collections. 
     pub fn disallow_collections<
         Arg0: ProxyArg<MultiValueManagedVec<Env::Api, TokenIdentifier<Env::Api>>>,
     >(

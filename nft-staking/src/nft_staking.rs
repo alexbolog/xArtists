@@ -1,5 +1,6 @@
 #![no_std]
 
+use constants::UNSTAKE_PENALTY;
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
@@ -26,8 +27,7 @@ pub trait NftStaking:
 {
     #[init]
     fn init(&self) {
-        let unstake_penalty = 7 * 24 * 3600u64; // 7 days
-        self.set_unstaking_penalty(unstake_penalty);
+        self.set_unstaking_penalty(UNSTAKE_PENALTY);
     }
 
     #[upgrade]

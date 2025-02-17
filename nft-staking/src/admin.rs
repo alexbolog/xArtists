@@ -29,6 +29,8 @@ pub trait AdminModule:
         }
     }
 
+    /// I don't recommend using this function as it won't update user's storage.
+    /// Its effect as of now is to stop other users from staking NFTs from the given collections.
     #[only_owner]
     #[endpoint(disallowCollections)]
     fn disallow_collections(&self, collections: MultiValueManagedVec<TokenIdentifier>) {

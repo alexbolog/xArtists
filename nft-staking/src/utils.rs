@@ -10,11 +10,15 @@ pub trait UtilsModule: crate::storage::StorageModule {
     }
 
     fn get_nft_score(&self, token_id: &TokenIdentifier, nonce: u64) -> BigUint {
-        if self.nft_collection_nonce_score(token_id, nonce).is_empty() {
+        if !self.nft_collection_nonce_score(token_id, nonce).is_empty() {
+            return self.nft_collection_nonce_score(token_id, nonce).get();
+        }
+
+        if !self.nft_collection_score(token_id).is_empty() {
             return self.nft_collection_score(token_id).get();
         }
 
-        self.nft_collection_nonce_score(token_id, nonce).get()
+        BigUint::from(DEFAULT_NFT_SCORE)
     }
 
     fn require_staking_enabled(&self) {
