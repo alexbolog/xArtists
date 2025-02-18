@@ -31,7 +31,7 @@ TODO Core Staking Implementation
     
   - Scoring System
     - DONE Base collection multiplier
-    - SKIP Individual NFT trait multipliers (optional)
+    - DONE Individual NFT trait multipliers (optional)
     - DONE Score calculation function
 
 TODO Reward Distribution
@@ -39,6 +39,7 @@ TODO Reward Distribution
     - DONE Daily reward pool configuration
     - DONE Reward accrual based on stake score
     - DONE Claim rewards function
+    - DONE Planned distribution
     
   - Distribution Mechanics
     - DONE User reward calculation formula
@@ -55,5 +56,12 @@ TODO Testing Framework
   - Integration tests
   - Reward calculation tests
   - Edge cases and security tests
+    - tc: can unstake NFTs that are no longer supported (although were supported in the past)
+    - tc: user stakes after reward started - should have reward rate set correctly
+  
+  
+  - TODO: IMPORTANT!!!!!!
+    Investigate why checks from unit tests just pass without actually checking anything
+
 
 DONE break logic into smaller modules

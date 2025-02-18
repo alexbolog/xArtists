@@ -76,7 +76,15 @@ pub trait PlannedDistributionModule: super::reward_rate::RewardRateModule {
             return Some(BigUint::zero());
         }
 
-        let amount = amount_per_round * (current_round - start_round);
+        let last_distribution_round = if self.last_distribution_round().is_empty() {
+            *start_round
+        } else {
+            self.last_distribution_round().get()
+        };
+
+        let undistributed_rounds = current_round - last_distribution_round;
+        let amount = amount_per_round * undistributed_rounds;
+
         Some(amount)
     }
 

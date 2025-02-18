@@ -129,10 +129,6 @@ pub trait RewardRateModule {
     #[storage_mapper("aggregatedStakedScore")]
     fn aggregated_staked_score(&self) -> SingleValueMapper<BigUint>;
 
-    #[view(getRewardRate)]
-    #[storage_mapper("rewardRate")]
-    fn reward_rate(&self, reward_token_id: &TokenIdentifier) -> SingleValueMapper<BigUint>;
-
     #[view(getCurrentRewardRate)]
     #[storage_mapper("currentRewardRate")]
     fn current_reward_rate(&self, reward_token_id: &TokenIdentifier) -> SingleValueMapper<BigUint>;

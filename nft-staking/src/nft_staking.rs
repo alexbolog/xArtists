@@ -28,6 +28,9 @@ pub trait NftStaking:
     #[init]
     fn init(&self) {
         self.set_unstaking_penalty(UNSTAKE_PENALTY);
+
+        // avoids division by zero, will accrue a minimal amount of unaccessible rewards
+        self.aggregated_staked_score().set(BigUint::from(1u64)); 
     }
 
     #[upgrade]

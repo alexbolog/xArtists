@@ -94,6 +94,16 @@ pub trait ViewsModule:
     fn get_last_distribution_round(&self) -> u64 {
         self.last_distribution_round().get()
     }
+
+    #[view(getRewardRate)]
+    fn get_reward_rate(&self, token_id: &TokenIdentifier) -> BigUint<Self::Api> {
+        self.current_reward_rate(token_id).get()
+    }
+
+    #[view(isRewardToken)]
+    fn is_reward_token(&self, token_id: &TokenIdentifier) -> bool {
+        self.reward_token_ids().contains(token_id)
+    }
 }
 
 #[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode)]

@@ -6,4 +6,4 @@ pub const ERR_NO_UNSTAKED_ITEMS: &str = "No unstaked items";
 
 // default configuration
 pub const UNSTAKE_PENALTY: u64 = 7 * 24 * 3600u64; // 7 days
-pub const DEFAULT_NFT_SCORE: u64 = 1000; // 1000
+pub const DEFAULT_NFT_SCORE: u64 = 1_000_000; // 1000

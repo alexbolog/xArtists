@@ -45,6 +45,19 @@ pub fn check_aggregated_staking_score(world: &mut ScenarioWorld, expected_score:
         .returns(ExpectValue(expected_score));
 }
 
+pub fn check_reward_rate(
+    world: &mut ScenarioWorld,
+    token_id: &TestTokenIdentifier,
+    expected_rate: u64,
+) {
+    let _ = world
+        .query()
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .get_reward_rate(token_id.to_token_identifier())
+        .returns(ExpectValue(expected_rate));
+}
+
 pub fn check_distribution_amount_per_round(
     world: &mut ScenarioWorld,
     start_round: u64,
@@ -58,6 +71,24 @@ pub fn check_distribution_amount_per_round(
         .typed(nft_staking::proxy::NftStakingProxy)
         .get_amount_per_round(start_round, end_round, total_distribution_amount)
         .returns(ExpectValue(expected_amount_per_round));
+}
+
+pub fn check_last_distribution_round(world: &mut ScenarioWorld, expected_round: u64) {
+    let _ = world
+        .query()
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .get_last_distribution_round()
+        .returns(ExpectValue(expected_round));
+}
+
+pub fn check_if_token_is_reward_token(world: &mut ScenarioWorld, token_id: &TestTokenIdentifier) {
+    let _ = world
+        .query()
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .is_reward_token(token_id.to_token_identifier())
+        .returns(ExpectValue(true));
 }
 
 ////////////////////////////////////////////////////////////
@@ -198,7 +229,7 @@ pub fn send_set_collection_nonce_score_tx(
 
 pub fn send_distribute_rewards_tx(
     world: &mut ScenarioWorld,
-    token_id: &TestTokenIdentifier,
+    token_id: TestTokenIdentifier,
     amount: u64,
 ) {
     world

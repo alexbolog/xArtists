@@ -306,6 +306,32 @@ where
             .original_result()
     }
 
+    pub fn get_reward_rate<
+        Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
+    >(
+        self,
+        token_id: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getRewardRate")
+            .argument(&token_id)
+            .original_result()
+    }
+
+    pub fn is_reward_token<
+        Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
+    >(
+        self,
+        token_id: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, bool> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("isRewardToken")
+            .argument(&token_id)
+            .original_result()
+    }
+
     pub fn user_staked_score<
         Arg0: ProxyArg<ManagedAddress<Env::Api>>,
     >(
@@ -325,19 +351,6 @@ where
         self.wrapped_tx
             .payment(NotPayable)
             .raw_call("getAggregatedStakedScore")
-            .original_result()
-    }
-
-    pub fn reward_rate<
-        Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
-    >(
-        self,
-        reward_token_id: Arg0,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
-        self.wrapped_tx
-            .payment(NotPayable)
-            .raw_call("getRewardRate")
-            .argument(&reward_token_id)
             .original_result()
     }
 
