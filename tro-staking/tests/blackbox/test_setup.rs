@@ -78,10 +78,11 @@ pub fn check_staked_amount(
     token_id: TestTokenIdentifier,
     expected_amount: u64,
 ) {
-    let _ = world
+    world
         .query()
         .to(SC_ADDRESS)
         .typed(tro_staking::proxy::TroStakingProxy)
         .users_stake(address, token_id)
-        .returns(ExpectValue(BigUint::from(expected_amount)));
+        .returns(ExpectValue(BigUint::from(expected_amount)))
+        .run();
 }
