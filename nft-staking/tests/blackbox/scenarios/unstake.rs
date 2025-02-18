@@ -3,7 +3,8 @@ use multiversx_sc_scenario::{
     imports::SetStateStep, managed_biguint, ExpectError, ExpectStatus, ScenarioTxRun,
 };
 use nft_staking::constants::{
-    DEFAULT_NFT_SCORE, ERR_NO_UNSTAKED_ITEMS, ERR_STAKING_DISABLED, ERR_USER_HAS_NOT_ENOUGH_STAKED_BALANCE, UNSTAKE_PENALTY
+    DEFAULT_NFT_SCORE, ERR_NO_UNSTAKED_ITEMS, ERR_STAKING_DISABLED,
+    ERR_USER_HAS_NOT_ENOUGH_STAKED_BALANCE, UNSTAKE_PENALTY,
 };
 
 use crate::{
@@ -265,5 +266,38 @@ fn unstaking_should_only_decrease_staking_scores_for_the_unstaked_assets() {
     );
 
     check_aggregated_staking_score(&mut world, INITIAL_SFT_BALANCE * DEFAULT_NFT_SCORE);
-    check_user_staking_score(&mut world, &USER_ADDRESS, INITIAL_SFT_BALANCE * DEFAULT_NFT_SCORE);
+    check_user_staking_score(
+        &mut world,
+        &USER_ADDRESS,
+        INITIAL_SFT_BALANCE * DEFAULT_NFT_SCORE,
+    );
+}
+
+#[test]
+fn double_sft_unstake_fails_if_not_enough_staked_balance() {
+    let mut world = setup_world_with_contract();
+
+    send_stake_tx(&mut world, &USER_ADDRESS, &[&(SFT_TOKEN_ID, 1, 1)]);
+    send_stake_tx(&mut world, &OWNER_ADDRESS, &[&(SFT_TOKEN_ID, 1, 1)]);
+
+    let mut unstake_request = MultiValueManagedVec::new();
+    unstake_request.push(EsdtTokenPayment::new(
+        SFT_TOKEN_ID.to_token_identifier(),
+        1,
+        managed_biguint!(1),
+    ));
+    unstake_request.push(EsdtTokenPayment::new(
+        SFT_TOKEN_ID.to_token_identifier(),
+        1,
+        managed_biguint!(1),
+    ));
+
+    world
+        .tx()
+        .from(USER_ADDRESS.to_address())
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .unstake(unstake_request)
+        .returns(ExpectError(4u64, ERR_USER_HAS_NOT_ENOUGH_STAKED_BALANCE))
+        .run();
 }
