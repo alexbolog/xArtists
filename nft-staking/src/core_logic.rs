@@ -121,7 +121,7 @@ pub trait CoreLogic:
                     .insert(payment.token_identifier.clone());
             }
 
-            self.handle_increase_reward_rate_from_payment(&payment);
+            self.handle_increase_reward_rate(&payment);
         }
     }
 }

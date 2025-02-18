@@ -16,26 +16,16 @@ pub trait RewardRateModule {
             .update(|prev| *prev -= amount);
     }
 
-    fn handle_increase_reward_rate_from_payment(&self, payment: &EsdtTokenPayment) {
-        self.handle_increase_reward_rate_by_denominated_amount(
-            &payment.token_identifier,
-            &payment.amount,
-        );
-    }
-
-    fn handle_increase_reward_rate_by_denominated_amount(
-        &self,
-        token_id: &TokenIdentifier,
-        amount: &BigUint,
-    ) {
+    fn handle_increase_reward_rate(&self, payment: &EsdtTokenPayment) {
         let aggregated_stake_score = self.aggregated_staked_score().get();
         if aggregated_stake_score == 0 {
             return;
         }
 
-        let distribution_rate_increase = amount / &aggregated_stake_score;
+        let distribution_rate_increase =
+            &payment.amount * REWARD_RATE_DENOMINATION / &aggregated_stake_score;
 
-        self.current_reward_rate(token_id)
+        self.current_reward_rate(&payment.token_identifier)
             .update(|prev| *prev += &distribution_rate_increase);
     }
 

@@ -1,4 +1,4 @@
-use multiversx_sc_scenario::imports::SetStateStep;
+use multiversx_sc_scenario::{imports::SetStateStep, rust_biguint};
 use nft_staking::{constants::DEFAULT_NFT_SCORE, reward::reward_rate::REWARD_RATE_DENOMINATION};
 
 use crate::{
@@ -68,7 +68,7 @@ fn planned_distribution_happens_exactly_once() {
     // - total staked score is 2, and owned by the same single staker
 
     let expected_reward_rate = REWARD_RATE_DENOMINATION; // 1 token per round
-    check_reward_rate(&mut world, &REWARD_TOKEN_ID_1, expected_reward_rate);
+    check_reward_rate(&mut world, &REWARD_TOKEN_ID_1, rust_biguint!(expected_reward_rate));
 }
 
 #[test]
@@ -78,7 +78,7 @@ fn planned_distribution_state_update_should_not_happen_unless_triggered() {
     send_set_distribution_plan_tx(&mut world, REWARD_TOKEN_ID_1, 0, 100, 100); // 1 tokens per round
     world.set_state_step(SetStateStep::new().block_round(100)); // advance to next round
 
-    check_reward_rate(&mut world, &REWARD_TOKEN_ID_1, 0);
+    check_reward_rate(&mut world, &REWARD_TOKEN_ID_1, rust_biguint!(0));
     check_last_distribution_round(&mut world, 0);
 }
 
@@ -89,6 +89,6 @@ fn existing_stakers_should_receive_rewards_with_no_state_update() {
     send_set_distribution_plan_tx(&mut world, REWARD_TOKEN_ID_1, 0, 100, 100); // 1 tokens per round
     send_stake_tx(&mut world, &USER_ADDRESS, &[&(NFT_TOKEN_ID, 1, 1)]); // triggers distribution
 
-    check_reward_rate(&mut world, &REWARD_TOKEN_ID_1, 12345);
+    check_reward_rate(&mut world, &REWARD_TOKEN_ID_1, rust_biguint!(0));
     check_last_distribution_round(&mut world, 0);
 }

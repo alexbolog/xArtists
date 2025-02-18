@@ -1,5 +1,5 @@
-use multiversx_sc_scenario::imports::SetStateStep;
-use nft_staking::constants::DEFAULT_NFT_SCORE;
+use multiversx_sc_scenario::{imports::SetStateStep, managed_biguint, rust_biguint};
+use nft_staking::{constants::DEFAULT_NFT_SCORE, reward::reward_rate::REWARD_RATE_DENOMINATION};
 
 use crate::{
     blackbox::{
@@ -17,8 +17,11 @@ fn manual_reward_distribution_correctly_updates_reward_rate() {
     let mut world = setup_world_with_contract();
 
     send_stake_tx(&mut world, &USER_ADDRESS, &[&(NFT_TOKEN_ID, 1, 1)]);
+    send_stake_tx(&mut world, &USER_ADDRESS, &[&(NFT_TOKEN_ID, 2, 1)]);
+
     let amount_to_distribute = DEFAULT_NFT_SCORE;
-    let expected_reward_rate = amount_to_distribute / DEFAULT_NFT_SCORE;
+    let expected_reward_rate = rust_biguint!(REWARD_RATE_DENOMINATION / 2);
+
     send_distribute_rewards_tx(&mut world, REWARD_TOKEN_ID_1, amount_to_distribute);
 
     check_reward_rate(&mut world, &REWARD_TOKEN_ID_1, expected_reward_rate);

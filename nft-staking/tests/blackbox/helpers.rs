@@ -51,7 +51,7 @@ pub fn check_aggregated_staking_score(world: &mut ScenarioWorld, expected_score:
 pub fn check_reward_rate(
     world: &mut ScenarioWorld,
     token_id: &TestTokenIdentifier,
-    expected_rate: u64,
+    expected_rate: RustBigUint,
 ) {
     world
         .query()
