@@ -15,12 +15,13 @@ pub fn check_staked_amount(
     nonce: u64,
     expected_amount: u64,
 ) {
-    let _ = world
+    world
         .query()
         .to(SC_ADDRESS)
         .typed(nft_staking::proxy::NftStakingProxy)
         .get_stake_quantity(user.to_address(), token_id.to_token_identifier(), nonce)
-        .returns(ExpectValue(expected_amount));
+        .returns(ExpectValue(expected_amount))
+        .run();
 }
 
 pub fn check_user_staking_score(
@@ -28,21 +29,23 @@ pub fn check_user_staking_score(
     user: &TestAddress,
     expected_score: u64,
 ) {
-    let _ = world
+    world
         .query()
         .to(SC_ADDRESS)
         .typed(nft_staking::proxy::NftStakingProxy)
         .get_user_staking_score(user.to_address())
-        .returns(ExpectValue(expected_score));
+        .returns(ExpectValue(expected_score))
+        .run();
 }
 
 pub fn check_aggregated_staking_score(world: &mut ScenarioWorld, expected_score: u64) {
-    let _ = world
+    world
         .query()
         .to(SC_ADDRESS)
         .typed(nft_staking::proxy::NftStakingProxy)
         .get_aggregated_staking_score()
-        .returns(ExpectValue(expected_score));
+        .returns(ExpectValue(expected_score))
+        .run();
 }
 
 pub fn check_reward_rate(
@@ -50,12 +53,13 @@ pub fn check_reward_rate(
     token_id: &TestTokenIdentifier,
     expected_rate: u64,
 ) {
-    let _ = world
+    world
         .query()
         .to(SC_ADDRESS)
         .typed(nft_staking::proxy::NftStakingProxy)
         .get_reward_rate(token_id.to_token_identifier())
-        .returns(ExpectValue(expected_rate));
+        .returns(ExpectValue(expected_rate))
+        .run();
 }
 
 pub fn check_distribution_amount_per_round(
@@ -65,30 +69,33 @@ pub fn check_distribution_amount_per_round(
     total_distribution_amount: u64,
     expected_amount_per_round: u64,
 ) {
-    let _ = world
+    world
         .query()
         .to(SC_ADDRESS)
         .typed(nft_staking::proxy::NftStakingProxy)
         .get_amount_per_round(start_round, end_round, total_distribution_amount)
-        .returns(ExpectValue(expected_amount_per_round));
+        .returns(ExpectValue(expected_amount_per_round))
+        .run();
 }
 
 pub fn check_last_distribution_round(world: &mut ScenarioWorld, expected_round: u64) {
-    let _ = world
+    world
         .query()
         .to(SC_ADDRESS)
         .typed(nft_staking::proxy::NftStakingProxy)
         .get_last_distribution_round()
-        .returns(ExpectValue(expected_round));
+        .returns(ExpectValue(expected_round))
+        .run();
 }
 
 pub fn check_if_token_is_reward_token(world: &mut ScenarioWorld, token_id: &TestTokenIdentifier) {
-    let _ = world
+    world
         .query()
         .to(SC_ADDRESS)
         .typed(nft_staking::proxy::NftStakingProxy)
         .is_reward_token(token_id.to_token_identifier())
-        .returns(ExpectValue(true));
+        .returns(ExpectValue(true))
+        .run();
 }
 
 ////////////////////////////////////////////////////////////

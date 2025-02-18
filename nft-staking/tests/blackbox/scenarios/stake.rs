@@ -144,7 +144,7 @@ fn staking_multiple_assets_should_increase_staking_scores() {
         ],
     );
 
-    let expected_score = 13; // 1 + 1 + 1 + 10
+    let expected_score = 13 * DEFAULT_NFT_SCORE; // 1 + 1 + 1 + 10
     check_aggregated_staking_score(&mut world, expected_score);
     check_user_staking_score(&mut world, &USER_ADDRESS, expected_score);
 }

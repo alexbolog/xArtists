@@ -90,5 +90,5 @@ fn existing_stakers_should_receive_rewards_with_no_state_update() {
     send_stake_tx(&mut world, &USER_ADDRESS, &[&(NFT_TOKEN_ID, 1, 1)]); // triggers distribution
 
     check_reward_rate(&mut world, &REWARD_TOKEN_ID_1, 12345);
-    check_last_distribution_round(&mut world, 999);
+    check_last_distribution_round(&mut world, 0);
 }

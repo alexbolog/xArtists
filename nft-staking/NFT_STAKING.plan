@@ -5,7 +5,7 @@ DONE Specs
   1. NFT staking contract
     - stake NFTs
     - stake SFTs
-    - TODO unstake penalty?
+    - DONE unstake penalty?
   2. Proportional reward distribution
     - supports multiple ESDTs
     - keep track of reward rates for all reward tokens
@@ -46,10 +46,11 @@ TODO Reward Distribution
     - DONE Anti-gaming mechanisms
     
 TODO Analytics & Views
-  - User stake information
-  - Collection statistics
-  - Global staking metrics
-  - Reward distribution history
+  - DONE User stake information
+  - WAIT at to backend if needed
+    - SKIP Collection statistics
+    - SKIP Global staking metrics
+    - SKIP Reward distribution history
   
 TODO Testing Framework
   - Unit tests for core functions
@@ -58,10 +59,5 @@ TODO Testing Framework
   - Edge cases and security tests
     - tc: can unstake NFTs that are no longer supported (although were supported in the past)
     - tc: user stakes after reward started - should have reward rate set correctly
-  
-  
-  - TODO: IMPORTANT!!!!!!
-    Investigate why checks from unit tests just pass without actually checking anything
-
 
 DONE break logic into smaller modules

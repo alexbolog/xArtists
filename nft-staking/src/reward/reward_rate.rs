@@ -29,6 +29,10 @@ pub trait RewardRateModule {
         amount: &BigUint,
     ) {
         let aggregated_stake_score = self.aggregated_staked_score().get();
+        if aggregated_stake_score == 0 {
+            return;
+        }
+
         let distribution_rate_increase = amount / &aggregated_stake_score;
 
         self.current_reward_rate(token_id)
