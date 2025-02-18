@@ -41,7 +41,7 @@ pub trait PlannedDistributionModule: super::reward_rate::RewardRateModule {
         if let Some(amount) =
             self.get_amount_to_distribute(&plan, self.blockchain().get_block_round())
         {
-            self.handle_increase_reward_rate(&EsdtTokenPayment::new(plan.0.clone(), 0, amount));
+            self.handle_increase_reward_rate_raw(&plan.0, amount);
         }
 
         require!(self.distribution_plans().remove(&plan), "Plan not found");
@@ -52,7 +52,7 @@ pub trait PlannedDistributionModule: super::reward_rate::RewardRateModule {
         let current_round = self.blockchain().get_block_round();
         for plan in self.distribution_plans().iter() {
             if let Some(amount) = self.get_amount_to_distribute(&plan, current_round) {
-                self.handle_increase_reward_rate(&EsdtTokenPayment::new(plan.0, 0, amount));
+                self.handle_increase_reward_rate_raw(&plan.0, amount);
                 self.last_distribution_round().set(current_round);
             } else {
                 self.distribution_plans().remove(&plan);

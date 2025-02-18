@@ -92,6 +92,8 @@ pub trait AdminModule:
     #[endpoint(createDistributionPlan)]
     fn create_distribution_plan(&self, start_round: u64, end_round: u64) {
         let payment = self.call_value().single_esdt();
+        self.reward_token_ids()
+            .insert(payment.token_identifier.clone());
         self.create_plan(
             payment.token_identifier.clone(),
             start_round,

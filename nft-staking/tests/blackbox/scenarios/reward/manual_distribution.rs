@@ -1,4 +1,4 @@
-use multiversx_sc_scenario::{imports::SetStateStep, managed_biguint, rust_biguint};
+use multiversx_sc_scenario::{imports::SetStateStep, rust_biguint};
 use nft_staking::{constants::DEFAULT_NFT_SCORE, reward::reward_rate::REWARD_RATE_DENOMINATION};
 
 use crate::{

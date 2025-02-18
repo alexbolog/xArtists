@@ -66,8 +66,8 @@ pub fn check_distribution_amount_per_round(
     world: &mut ScenarioWorld,
     start_round: u64,
     end_round: u64,
-    total_distribution_amount: u64,
-    expected_amount_per_round: u64,
+    total_distribution_amount: RustBigUint,
+    expected_amount_per_round: RustBigUint,
 ) {
     world
         .query()
@@ -95,6 +95,21 @@ pub fn check_if_token_is_reward_token(world: &mut ScenarioWorld, token_id: &Test
         .typed(nft_staking::proxy::NftStakingProxy)
         .is_reward_token(token_id.to_token_identifier())
         .returns(ExpectValue(true))
+        .run();
+}
+
+pub fn check_pending_reward(
+    world: &mut ScenarioWorld,
+    user: &TestAddress,
+    token_id: &TestTokenIdentifier,
+    expected_reward: RustBigUint,
+) {
+    world
+        .query()
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .get_pending_token_reward(user.to_address(), token_id.to_token_identifier())
+        .returns(ExpectValue(expected_reward))
         .run();
 }
 
@@ -272,5 +287,16 @@ pub fn send_set_distribution_plan_tx(
             0u64,
             managed_biguint!(total_amount),
         ))
+        .run();
+}
+
+pub fn send_claim_rewards_tx(world: &mut ScenarioWorld, user: &TestAddress) {
+    world
+        .tx()
+        .from(user.to_address())
+        .to(SC_ADDRESS)
+        .typed(nft_staking::proxy::NftStakingProxy)
+        .claim_rewards()
+        .returns(ExpectStatus(0u64))
         .run();
 }

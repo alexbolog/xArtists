@@ -230,6 +230,19 @@ where
             .original_result()
     }
 
+    pub fn get_staking_info<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+    >(
+        self,
+        address: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, StakingInfo<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getStakingInfo")
+            .argument(&address)
+            .original_result()
+    }
+
     pub fn get_pending_rewards_view<
         Arg0: ProxyArg<ManagedAddress<Env::Api>>,
     >(
@@ -252,6 +265,19 @@ where
         self.wrapped_tx
             .payment(NotPayable)
             .raw_call("getStakedItems")
+            .argument(&address)
+            .original_result()
+    }
+
+    pub fn get_unstaking_items<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+    >(
+        self,
+        address: Arg0,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ManagedVec<Env::Api, UnstakingBatch<Env::Api>>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getUnstakingItems")
             .argument(&address)
             .original_result()
     }
@@ -328,6 +354,22 @@ where
         self.wrapped_tx
             .payment(NotPayable)
             .raw_call("isRewardToken")
+            .argument(&token_id)
+            .original_result()
+    }
+
+    pub fn get_pending_token_reward<
+        Arg0: ProxyArg<ManagedAddress<Env::Api>>,
+        Arg1: ProxyArg<TokenIdentifier<Env::Api>>,
+    >(
+        self,
+        address: Arg0,
+        token_id: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getPendingTokenReward")
+            .argument(&address)
             .argument(&token_id)
             .original_result()
     }
@@ -482,6 +524,9 @@ where
             .original_result()
     }
 
+    /// Distribute rewards to all stakers. 
+    /// Expects at least a payment that consists of the total amount of tokens to be distributed. 
+    /// Used for unscheduled reward distributions (e.g. airdrop, campaigns, module integrations etc). 
     pub fn distribute_rewards(
         self,
     ) -> TxTypedCall<Env, From, To, (), Gas, ()> {
@@ -490,6 +535,9 @@ where
             .original_result()
     }
 
+    /// Set the unstaking penalty. 
+    /// A period of time in seconds that users have to wait before they can claim their unstaked NFTs. 
+    /// Changing this value will affect all users and ongoing unstaking processes. 
     pub fn set_unstaking_penalty<
         Arg0: ProxyArg<u64>,
     >(
@@ -503,7 +551,8 @@ where
             .original_result()
     }
 
-    /// Careful with this function. It will set the score for all NFTs in the collection. 
+    /// Change the score for all NFTs in the collection. 
+    /// Will also add the collection to the list of allowed collections. 
     /// This will *NOT* update the score for already staked NFTs. 
     pub fn set_collection_score<
         Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
@@ -521,7 +570,8 @@ where
             .original_result()
     }
 
-    /// Careful with this function. It will set the score for all NFTs in the collection. 
+    /// Change the score for a specific nonce of an NFT in the collection. 
+    /// Will also add the collection to the list of allowed collections. 
     /// This will *NOT* update the score for already staked NFTs. 
     pub fn set_collection_nonce_score<
         Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
@@ -542,6 +592,9 @@ where
             .original_result()
     }
 
+    /// Create a new distribution plan. 
+    /// Expects a single payment that consists of the total amount of tokens to be distributed. 
+    /// The amount per round will be calculated based on the total amount and the number of rounds. 
     pub fn create_distribution_plan<
         Arg0: ProxyArg<u64>,
         Arg1: ProxyArg<u64>,
@@ -557,6 +610,8 @@ where
             .original_result()
     }
 
+    /// Remove a distribution plan. 
+    /// Must provide the exact plan configuration to remove. 
     pub fn remove_distribution_plan<
         Arg0: ProxyArg<TokenIdentifier<Env::Api>>,
         Arg1: ProxyArg<u64>,
@@ -578,4 +633,27 @@ where
             .argument(&amount_per_round)
             .original_result()
     }
+}
+
+#[type_abi]
+#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode)]
+pub struct StakingInfo<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub staked_items: ManagedVec<Api, EsdtTokenPayment<Api>>,
+    pub staked_score: BigUint<Api>,
+    pub aggregated_staked_score: BigUint<Api>,
+    pub pending_rewards: ManagedVec<Api, EsdtTokenPayment<Api>>,
+    pub unstaking_items: ManagedVec<Api, UnstakingBatch<Api>>,
+}
+
+#[type_abi]
+#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, ManagedVecItem)]
+pub struct UnstakingBatch<Api>
+where
+    Api: ManagedTypeApi,
+{
+    pub unstake_timestamp: u64,
+    pub unstake_items: ManagedVec<Api, EsdtTokenPayment<Api>>,
 }

@@ -104,6 +104,19 @@ pub trait ViewsModule:
     fn is_reward_token(&self, token_id: &TokenIdentifier) -> bool {
         self.reward_token_ids().contains(token_id)
     }
+
+    #[view(getPendingTokenReward)]
+    fn get_pending_token_reward(
+        &self,
+        address: ManagedAddress,
+        token_id: TokenIdentifier,
+    ) -> BigUint<Self::Api> {
+        if let Some(payment) = self.get_pending_rewards_for_token(&address, token_id) {
+            payment.amount
+        } else {
+            BigUint::zero()
+        }
+    }
 }
 
 #[type_abi]

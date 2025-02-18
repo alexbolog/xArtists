@@ -1,6 +1,6 @@
 use multiversx_sc::imports::*;
 
-use crate::constants::ERR_NO_UNSTAKED_ITEMS;
+use crate::constants::{ERR_NO_REWARDS_TO_CLAIM, ERR_NO_UNSTAKED_ITEMS};
 
 #[multiversx_sc::module]
 pub trait CoreLogic:
@@ -98,6 +98,7 @@ pub trait CoreLogic:
             }
         }
 
+        require!(!reward_payments.is_empty(), ERR_NO_REWARDS_TO_CLAIM);
         self.send().direct_multi(user, &reward_payments);
     }
 
@@ -115,6 +116,8 @@ pub trait CoreLogic:
     }
 
     fn handle_distribute_rewards(&self, rewards: &ManagedVec<EsdtTokenPayment>) {
+        self.distribute_as_planned(); // Why not?
+
         for payment in rewards.iter() {
             if !self.reward_token_ids().contains(&payment.token_identifier) {
                 self.reward_token_ids()

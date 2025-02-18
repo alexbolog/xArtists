@@ -17,15 +17,21 @@ pub trait RewardRateModule {
     }
 
     fn handle_increase_reward_rate(&self, payment: &EsdtTokenPayment) {
+        self.handle_increase_reward_rate_raw(
+            &payment.token_identifier,
+            &payment.amount * REWARD_RATE_DENOMINATION,
+        );
+    }
+
+    fn handle_increase_reward_rate_raw(&self, token_id: &TokenIdentifier, amount: BigUint) {
         let aggregated_stake_score = self.aggregated_staked_score().get();
         if aggregated_stake_score == 0 {
             return;
         }
 
-        let distribution_rate_increase =
-            &payment.amount * REWARD_RATE_DENOMINATION / &aggregated_stake_score;
+        let distribution_rate_increase = &amount / &aggregated_stake_score;
 
-        self.current_reward_rate(&payment.token_identifier)
+        self.current_reward_rate(token_id)
             .update(|prev| *prev += &distribution_rate_increase);
     }
 
@@ -52,8 +58,12 @@ pub trait RewardRateModule {
         reward_token_id: &TokenIdentifier,
     ) -> BigUint {
         let current_rate = self.current_reward_rate(reward_token_id).get();
+        // if the user has no reward rate set, they start from 0. This should not affect reward distribution
+        // in case of new stakers as they have no staked score.
+        // In case of existing stakers, they will receive rewards based on the current reward rate that has
+        // been computed including their stake score.
         let user_rate = match self.user_reward_rate(user, reward_token_id).is_empty() {
-            true => current_rate.clone(),
+            true => BigUint::zero(), // user has no reward rate set, so they start from 0
             false => self.user_reward_rate(user, reward_token_id).get(),
         };
 
