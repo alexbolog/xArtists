@@ -3,8 +3,7 @@ use multiversx_sc_scenario::{
     imports::SetStateStep, managed_biguint, ExpectError, ExpectStatus, ScenarioTxRun,
 };
 use nft_staking::constants::{
-    ERR_NO_UNSTAKED_ITEMS, ERR_STAKING_DISABLED, ERR_USER_HAS_NOT_ENOUGH_STAKED_BALANCE,
-    UNSTAKE_PENALTY,
+    DEFAULT_NFT_SCORE, ERR_NO_UNSTAKED_ITEMS, ERR_STAKING_DISABLED, ERR_USER_HAS_NOT_ENOUGH_STAKED_BALANCE, UNSTAKE_PENALTY
 };
 
 use crate::{
@@ -265,6 +264,6 @@ fn unstaking_should_only_decrease_staking_scores_for_the_unstaked_assets() {
         ],
     );
 
-    check_aggregated_staking_score(&mut world, INITIAL_SFT_BALANCE);
-    check_user_staking_score(&mut world, &USER_ADDRESS, INITIAL_SFT_BALANCE);
+    check_aggregated_staking_score(&mut world, INITIAL_SFT_BALANCE * DEFAULT_NFT_SCORE);
+    check_user_staking_score(&mut world, &USER_ADDRESS, INITIAL_SFT_BALANCE * DEFAULT_NFT_SCORE);
 }
