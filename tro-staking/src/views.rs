@@ -4,14 +4,16 @@ use multiversx_sc::imports::*;
 
 use crate::voting::{Proposal, ProposalStatus, ProposalVoteCount, VoteContext};
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi)]
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct StakingContext<M: ManagedTypeApi> {
     pub users_stake: ManagedVec<M, EsdtTokenPayment<M>>,
     pub last_proposals_context: ProposalContext<M>,
     pub active_proposal_ids: ManagedVec<M, u64>,
 }
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi)]
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct ProposalContext<M: ManagedTypeApi> {
     pub proposal: Proposal<M>,
     pub users_voting_power: BigUint<M>,

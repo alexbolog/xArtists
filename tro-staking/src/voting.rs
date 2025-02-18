@@ -15,7 +15,8 @@ pub type LpToTroRatio<M: ManagedTypeApi> = MultiValue3<TokenIdentifier<M>, BigUi
 /// Representation of voting options
 /// Invalid it not considered a valid vote thus is being completely
 /// ignored from the voting validation logic
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi)]
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub enum VoteDecision {
     Invalid = 0,
     Approve = 1,
@@ -23,7 +24,8 @@ pub enum VoteDecision {
     Reject = 3,
 }
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, TypeAbi, Debug)]
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Debug)]
 pub enum ProposalStatus {
     Invalid = 0,
     Pending = 1,
@@ -33,7 +35,8 @@ pub enum ProposalStatus {
     Failed = 5,
 }
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem, TypeAbi)]
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Proposal<M: ManagedTypeApi> {
     pub id: u64,
     pub title: ManagedBuffer<M>,
@@ -45,7 +48,8 @@ pub struct Proposal<M: ManagedTypeApi> {
     pub min_voting_power_to_validate_vote: BigUint<M>,
 }
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi)]
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct VoteContext<M: ManagedTypeApi> {
     pub decision: VoteDecision,
     pub voting_power: BigUint<M>,
@@ -54,7 +58,8 @@ pub struct VoteContext<M: ManagedTypeApi> {
     pub epoch: u64,
 }
 
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem, TypeAbi)]
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct ProposalVoteCount<M: ManagedTypeApi> {
     pub approve: BigUint<M>,
     pub abstain: BigUint<M>,

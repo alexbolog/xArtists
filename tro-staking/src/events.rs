@@ -3,7 +3,8 @@ use crate::voting::{VoteContext, VoteDecision};
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
-#[derive(TypeAbi, TopEncode)]
+#[type_abi]
+#[derive(TopEncode)]
 pub struct StakeEvent<M: ManagedTypeApi> {
     caller: ManagedAddress<M>,
     payments: MultiEsdtPayment<M>,
@@ -12,7 +13,8 @@ pub struct StakeEvent<M: ManagedTypeApi> {
 #[allow(type_alias_bounds)]
 pub type UnstakeEvent<M: ManagedTypeApi> = StakeEvent<M>;
 
-#[derive(TypeAbi, TopEncode)]
+#[type_abi]
+#[derive(TopEncode)]
 pub struct ProposalCreatedEvent<M: ManagedTypeApi> {
     creator: ManagedAddress<M>,
     proposal_id: u64,
@@ -22,7 +24,8 @@ pub struct ProposalCreatedEvent<M: ManagedTypeApi> {
     end_time: u64,
 }
 
-#[derive(TypeAbi, TopEncode)]
+#[type_abi]
+#[derive(TopEncode)]
 pub struct VoteEvent<M: ManagedTypeApi> {
     voter: ManagedAddress<M>,
     proposal_id: u64,
