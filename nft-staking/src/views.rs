@@ -106,7 +106,8 @@ pub trait ViewsModule:
     }
 }
 
-#[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode)]
+#[type_abi]
+#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode)]
 pub struct StakingInfo<M: ManagedTypeApi> {
     pub staked_items: ManagedVec<M, EsdtTokenPayment<M>>,
     pub staked_score: BigUint<M>,
@@ -115,7 +116,8 @@ pub struct StakingInfo<M: ManagedTypeApi> {
     pub unstaking_items: ManagedVec<M, UnstakingBatch<M>>,
 }
 
-#[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode, ManagedVecItem)]
+#[type_abi]
+#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, ManagedVecItem)]
 pub struct UnstakingBatch<M: ManagedTypeApi> {
     pub unstake_timestamp: u64,
     pub unstake_items: ManagedVec<M, EsdtTokenPayment<M>>,

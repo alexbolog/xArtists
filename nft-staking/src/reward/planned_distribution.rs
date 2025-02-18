@@ -115,7 +115,8 @@ pub trait PlannedDistributionModule: super::reward_rate::RewardRateModule {
         let user_score = self.user_staked_score(user).get();
 
         for reward in undistributed_rewards.iter() {
-            let reward_payment = self.get_pending_rewards_for_token(user, reward.token_identifier);
+            let reward_payment =
+                self.get_pending_rewards_for_token(user, reward.token_identifier.clone());
             if let Some(mut reward_payment) = reward_payment {
                 reward_payment.amount = reward_payment.amount * &user_score / &total_score;
                 rewards.push(reward_payment);

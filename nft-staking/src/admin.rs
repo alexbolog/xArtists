@@ -93,10 +93,10 @@ pub trait AdminModule:
     fn create_distribution_plan(&self, start_round: u64, end_round: u64) {
         let payment = self.call_value().single_esdt();
         self.create_plan(
-            payment.token_identifier,
+            payment.token_identifier.clone(),
             start_round,
             end_round,
-            payment.amount,
+            payment.amount.clone(),
         );
     }
 
