@@ -1,0 +1,70 @@
+Project: TRO Governance Staking
+----------------------------------------
+
+DONE Project Setup
+  - Initialize project structure
+  - Setup dependencies
+  - Add basic contract structure
+
+DONE Core Staking Implementation
+  - DONE Add storage for TRO and LP token stakes
+  - DONE Implement stake functions
+  - DONE Implement unstake functions
+  - DONE Add unstake lock during active proposals
+  - DONE Add events for all actions
+    - DONE Stake/Unstake
+    - DONE Vote
+    - DONE Create Proposal
+
+SKIP External Pair Integration - skipped because we're going to supply the values from frontend
+  - Add MapMapper storage for TokenIdentifier -> PoolConfiguration
+  - Add supported pair types storage
+  - Implement pair token fetching
+  - Add LP token validation
+  - Calculate TRO equivalent from LP tokens
+
+DONE Voting System
+  - DONE Add proposal storage and creation
+  - DONE Only owner can create proposals
+  - DONE Implement voting power calculation:
+    - DONE Direct TRO power
+    - DONE LP-based TRO power
+  - DONE Add voting mechanism
+  - DONE Add proposal lifecycle management
+  - DONE Should users be allowed to only vote once or for full voting power? What if they stake more tokens in the pool? Should they be allowed to?: Once and full power at voting time.
+  - DONE update vote event
+
+DONE Analytics & Views
+  - DONE Add user stake information views
+  - DONE Add proposal status views
+  - DONE Add voting power views
+  - WAIT Add general statistics endpoints
+
+DONE Testing Framework
+  - DONE Unit tests for core functions
+  - DONE Integration tests:
+    - DONE Complete staking scenarios:
+        - DONE Stake scenarios
+          - DONE Basic stake functionality
+          - DONE power adjustment on stake
+        - DONE Unstake scenarios
+          - DONE Basic unstake functionality
+          - DONE power adjustment on unstake
+    - Voting scenarios
+        - DONE Valid proposal creation
+        - DONE Valid voting action
+        - DONE Valid proposal status
+        - DONE Valid power calculation:
+          - DONE $TRO power
+          - DONE LP tokens $TRO power
+    - SKIP Multiple LP pair scenarios - skipped because we're not going to integrate all the DEXes
+
+SKIP Reward System - skipped because it was replaced with EGLD airdrop after voting
+  - TRO rewards distribution
+  - Reward calculation
+  - Claiming mechanism
+
+NOTE Development Guidelines
+  - Document all public endpoints
+  - Add comprehensive error messages
+  - Emit events for tracking

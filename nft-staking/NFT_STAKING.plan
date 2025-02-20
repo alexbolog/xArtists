@@ -1,0 +1,63 @@
+Project: NFT Staking
+----------------------------------------
+
+DONE Specs
+  1. NFT staking contract
+    - stake NFTs
+    - stake SFTs
+    - DONE unstake penalty?
+  2. Proportional reward distribution
+    - supports multiple ESDTs
+    - keep track of reward rates for all reward tokens
+    - custom score per collection/nonce
+    - distribute based on total staked score
+
+DONE Project Setup
+  - DONE Initialize project structure
+  - DONE Setup dependencies
+  - DONE Add basic contract structure
+
+TODO Core Staking Implementation
+  - Storage
+    - DONE Staker info mapping (address => StakerInfo)
+    - DONE Collection info mapping (collection => CollectionConfig)
+    - DONE Global staking stats
+    - DONE Total stake score tracking
+  
+  - Staking Logic
+    - DONE Stake NFT/SFT function (single and batch)
+    - DONE Unstake NFT/SFT function (single and batch)
+    - TODO Collection registration/configuration
+    
+  - Scoring System
+    - DONE Base collection multiplier
+    - DONE Individual NFT trait multipliers (optional)
+    - DONE Score calculation function
+
+TODO Reward Distribution
+  - Distribution Logic
+    - DONE Daily reward pool configuration
+    - DONE Reward accrual based on stake score
+    - DONE Claim rewards function
+    - DONE Planned distribution
+    
+  - Distribution Mechanics
+    - DONE User reward calculation formula
+    - DONE Anti-gaming mechanisms
+    
+TODO Analytics & Views
+  - DONE User stake information
+  - WAIT at to backend if needed
+    - SKIP Collection statistics
+    - SKIP Global staking metrics
+    - SKIP Reward distribution history
+  
+TODO Testing Framework
+  - Unit tests for core functions
+  - Integration tests
+  - Reward calculation tests
+  - Edge cases and security tests
+    - tc: can unstake NFTs that are no longer supported (although were supported in the past)
+    - tc: user stakes after reward started - should have reward rate set correctly
+
+DONE break logic into smaller modules
