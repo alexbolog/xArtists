@@ -330,13 +330,13 @@ fn unstake_should_update_staked_amount() {
             .returns(ExpectStatus(0u64))
             .run();
 
-        check_staked_amount(&mut world, USER_ADDRESS, TRO_TOKEN_ID, 0);
+        check_staked_amount(&mut world, USER_ADDRESS, token_id, 0);
 
-        stake_token(&mut world, TRO_TOKEN_ID, 1000);
+        stake_token(&mut world, token_id, 1000);
 
         let mut unstake_args = MultiValueEncoded::new();
         unstake_args.push(MultiValue2((
-            TRO_TOKEN_ID.to_token_identifier(),
+            token_id.to_token_identifier(),
             BigUint::from(500u64),
         )));
 
@@ -349,6 +349,6 @@ fn unstake_should_update_staked_amount() {
             .returns(ExpectStatus(0u64))
             .run();
 
-        check_staked_amount(&mut world, USER_ADDRESS, TRO_TOKEN_ID, 500);
+        check_staked_amount(&mut world, USER_ADDRESS, token_id, 500);
     }
 }

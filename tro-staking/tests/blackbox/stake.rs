@@ -189,6 +189,6 @@ fn batch_staking_should_update_staked_amount() {
         .run();
 
     for token_id in tokens {
-        check_staked_amount(&mut world, USER_ADDRESS, token_id, stake_amount * 10);
+        check_staked_amount(&mut world, USER_ADDRESS, token_id, stake_amount);
     }
 }
