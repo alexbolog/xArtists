@@ -9,6 +9,20 @@ tro-staking/output
 tro-staking/wasm
 tro-staking/build
 
+simple-devnet-faucet/target
+simple-devnet-faucet/output
+simple-devnet-faucet/wasm
+simple-devnet-faucet/build
+
+demo-only-nft-minter/target
+demo-only-nft-minter/output
+demo-only-nft-minter/wasm
+demo-only-nft-minter/build
+
+# mxpy and wallet
+*.interaction.json
+wallet/
+
 # IDE specific files
 .idea/
 .vscode/

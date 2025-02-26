@@ -1,0 +1,24 @@
+[package]
+name = "demo-only-nft-minter"
+version = "0.0.0"
+publish = false
+edition = "2021"
+authors = ["you"]
+
+[lib]
+path = "src/demo_only_nft_minter.rs"
+
+[dependencies.multiversx-sc]
+version = "0.56.1"
+
+[dev-dependencies]
+num-bigint = "0.4"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.56.1"
+
+[workspace]
+members = [
+    ".",
+    "meta",
+]

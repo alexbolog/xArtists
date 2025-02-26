@@ -2,7 +2,9 @@ use multiversx_sc::derive_imports::*;
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
-use crate::voting::{Proposal, ProposalStatus, ProposalVoteCount, VoteContext};
+use crate::voting::{
+    FullProposalContext, Proposal, ProposalStatus, ProposalVoteCount, VoteContext,
+};
 
 #[type_abi]
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
@@ -158,5 +160,33 @@ pub trait ViewsModule:
     #[view(getProposalVoteCount)]
     fn get_proposal_vote_count_view(&self, proposal_id: u64) -> ProposalVoteCount<Self::Api> {
         self.get_proposal_vote_count(proposal_id)
+    }
+
+    #[view(getAllProposals)]
+    fn get_all_proposals(
+        &self,
+        user: OptionalValue<ManagedAddress>,
+    ) -> ManagedVec<Self::Api, FullProposalContext<Self::Api>> {
+        let mut last_proposal_id = self.last_proposal_id().get();
+        let mut proposals = ManagedVec::new();
+        let user = user.into_option().unwrap_or(ManagedAddress::zero());
+
+        while last_proposal_id > 0 {
+            proposals.push(FullProposalContext {
+                proposal: self.proposals(last_proposal_id).get(),
+                users_voting_power: self.get_voting_power(&user, last_proposal_id),
+                users_vote: self
+                    .get_proposal_vote_context(last_proposal_id, &user)
+                    .into_option(),
+                proposal_status: self.get_proposal_status(
+                    &self.proposals(last_proposal_id).get(),
+                    self.blockchain().get_block_timestamp(),
+                ) as u8,
+                proposal_vote_count: self.get_proposal_vote_count(last_proposal_id),
+            });
+            last_proposal_id -= 1;
+        }
+
+        proposals
     }
 }

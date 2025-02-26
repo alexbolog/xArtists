@@ -10,4 +10,10 @@ pub trait AdminModule: crate::storage::StorageModule {
             self.whitelisted_lp_token_identifiers().insert(lp_token_id);
         }
     }
+
+    #[only_owner]
+    #[endpoint(setTroTokenIdentifier)]
+    fn set_tro_token_identifier(&self, tro_token_identifier: TokenIdentifier) {
+        self.tro_token_identifier().set(tro_token_identifier);
+    }
 }

@@ -52,6 +52,7 @@ pub trait RewardRateModule {
             .set(self.current_reward_rate(reward_token_id).get());
     }
 
+    #[view(getUnstoredRewardsForToken)]
     fn get_unstored_rewards_for_token(
         &self,
         user: &ManagedAddress,
