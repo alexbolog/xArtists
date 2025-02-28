@@ -233,6 +233,17 @@ pub trait NftModule {
         nfts_for_sale
     }
     
+
+    #[endpoint(setRemoteRecreateRoles)]
+    fn set_remote_recreate_roles(&self, remote_address: ManagedAddress) {
+        self.send().esdt_system_sc_proxy().set_special_roles(
+            remote_address,
+            self.nft_token_id().get(),
+            [EsdtLocalRole::NftUpdateAttributes, EsdtLocalRole::NftAddUri][..].iter().cloned(),
+        )
+        .async_call_and_exit();
+    }
+    
     // storage
 
     #[storage_mapper("nftTokenId")]

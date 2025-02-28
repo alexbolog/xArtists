@@ -15,6 +15,8 @@ DEMO_NFT_MINTER_COLLECTION_NAME="xArtistsAIMegaWave"
 DEMO_NFT_MINTER_COLLECTION_TICKER="XARTAIMW"
 
 FAUCET_WASM_PATH="simple-devnet-faucet/output/simple-devnet-faucet.wasm"
+DEMO_ESCROW_WASM_PATH="demo-only-escrow/output/demo-only-escrow.wasm"
+FAUCET_INIT_COLLECTION="XARTAIMW-6d7155"
 
 deploy_nft_staking() {
     mxpy contract deploy --bytecode=$NFT_STAKING_WASM_PATH --recall-nonce --pem=${WALLET_PEM} --gas-limit=100000000 --send --outfile="deploy-nft-staking.interaction.json" --proxy=$PROXY --chain=$CHAIN_ID > /dev/null 2>&1
@@ -103,6 +105,18 @@ deploy_demo_nft_minter() {
     jq -r '.contractAddress' deploy-demo-nft-minter.interaction.json
 }
 
+upgrade_demo_nft_minter() {
+    DEMO_NFT_MINTER_ADDRESS=$1
+    mxpy contract upgrade $DEMO_NFT_MINTER_ADDRESS --bytecode=$DEMO_NFT_MINTER_WASM_PATH --recall-nonce --pem=${WALLET_PEM} --gas-limit=100000000 --send --outfile="upgrade-demo-nft-minter.interaction.json" --proxy=$PROXY --chain=$CHAIN_ID > /dev/null 2>&1
+    echo "Demo NFT Minter upgraded successfully"
+}
+
+set_remote_recreate_roles() {
+    DEMO_NFT_MINTER_ADDRESS=$1
+    TARGET_ADDRESS=$2
+    mxpy contract call $DEMO_NFT_MINTER_ADDRESS --function=setRemoteRecreateRoles --arguments $TARGET_ADDRESS --proxy=$PROXY --chain=$CHAIN_ID --pem=${WALLET_PEM} --recall-nonce --gas-limit=100000000 --send
+}
+
 issue_demo_nft_minter_collection() {
     DEMO_NFT_MINTER_ADDRESS=$1
     mxpy contract call $DEMO_NFT_MINTER_ADDRESS --function=issueToken --arguments str:$DEMO_NFT_MINTER_COLLECTION_NAME str:$DEMO_NFT_MINTER_COLLECTION_TICKER --proxy=$PROXY --chain=$CHAIN_ID --pem=${WALLET_PEM} --value=50000000000000000 --recall-nonce --gas-limit=80000000 --send
@@ -147,6 +161,19 @@ claim_from_faucet() {
     mxpy contract call $FAUCET_ADDRESS --function=claim --proxy=$PROXY --chain=$CHAIN_ID --pem=${WALLET_PEM} --recall-nonce --gas-limit=100000000 --send
 }
 
+# DEMO ESCROW
+
+deploy_demo_escrow() {
+    mxpy contract deploy --bytecode=$DEMO_ESCROW_WASM_PATH --recall-nonce --pem=${WALLET_PEM} --gas-limit=100000000 --send --outfile="deploy-demo-escrow.interaction.json" --proxy=$PROXY --chain=$CHAIN_ID --arguments str:$FAUCET_INIT_COLLECTION
+    jq -r '.contractAddress' deploy-demo-escrow.interaction.json
+}
+
+upgrade_demo_escrow() {
+    DEMO_ESCROW_ADDRESS=$1
+    mxpy contract upgrade $DEMO_ESCROW_ADDRESS --bytecode=$DEMO_ESCROW_WASM_PATH --recall-nonce --pem=${WALLET_PEM} --gas-limit=100000000 --send --outfile="upgrade-demo-escrow.interaction.json" --proxy=$PROXY --chain=$CHAIN_ID
+    echo "Demo Escrow upgraded successfully"
+}
+
 # MAIN
 
 # setup_tro_governance_contract
@@ -160,6 +187,16 @@ claim_from_faucet() {
 # address=$(deploy_faucet)
 # sleep 12
 # deposit_tro_tokens_to_faucet erd1qqqqqqqqqqqqqpgqjzn7zjyevwez8n0zfevpvnrwyp2ln879yj7sj8354t
-upgrade_faucet erd1qqqqqqqqqqqqqpgqjzn7zjyevwez8n0zfevpvnrwyp2ln879yj7sj8354t
-sleep 12
-claim_from_faucet erd1qqqqqqqqqqqqqpgqjzn7zjyevwez8n0zfevpvnrwyp2ln879yj7sj8354t
+# upgrade_faucet erd1qqqqqqqqqqqqqpgqjzn7zjyevwez8n0zfevpvnrwyp2ln879yj7sj8354t
+# sleep 12
+# claim_from_faucet erd1qqqqqqqqqqqqqpgqjzn7zjyevwez8n0zfevpvnrwyp2ln879yj7sj8354t
+
+# deploy_demo_escrow
+
+# add_nft_staking_whitelisted_nft_collection erd1qqqqqqqqqqqqqpgqmhtx5cctwwtatyaluycjfucre9y5vq2xyj7sqxr8cl XARTAIMW-6d7155 
+
+# upgrade_demo_nft_minter erd1qqqqqqqqqqqqqpgq00a2jzre64akaw4jx257gwwyfxxd8fzfyj7snyztkn
+# sleep 12
+# set_remote_recreate_roles erd1qqqqqqqqqqqqqpgq00a2jzre64akaw4jx257gwwyfxxd8fzfyj7snyztkn erd1qqqqqqqqqqqqqpgqrscvsxseyw04l0urzgnm2er5mxd2z64nyj7s6e0ca8
+
+upgrade_demo_escrow erd1qqqqqqqqqqqqqpgqrscvsxseyw04l0urzgnm2er5mxd2z64nyj7s6e0ca8

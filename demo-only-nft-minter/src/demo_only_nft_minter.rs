@@ -13,6 +13,9 @@ pub trait DemoOnlyNftMinter: nft_module::NftModule {
    #[init]
     fn init(&self) {}
 
+    #[upgrade]
+    fn upgrade(&self) {}
+
     #[allow_multiple_var_args]
     #[allow(clippy::too_many_arguments)]
     #[allow(clippy::redundant_closure)]

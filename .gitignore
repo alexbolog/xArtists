@@ -19,6 +19,11 @@ demo-only-nft-minter/output
 demo-only-nft-minter/wasm
 demo-only-nft-minter/build
 
+demo-only-escrow/target
+demo-only-escrow/output
+demo-only-escrow/wasm
+demo-only-escrow/build
+
 # mxpy and wallet
 *.interaction.json
 wallet/
