@@ -1,7 +1,7 @@
 use crate::errors::*;
 
-pub const DEFAULT_PROPOSAL_DURATION_IN_SECONDS: u64 = 24 * 3600; // Allow proposals to be active for 1 day by default
-pub const DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS: u64 = 3600; // Start proposal 1 hour after creation by default
+pub const DEFAULT_PROPOSAL_DURATION_IN_SECONDS: u64 = 60; // 24 * 3600; // Allow proposals to be active for 1 day by default
+pub const DEFAULT_PROPOSAL_START_TIME_DELAY_IN_SECONDS: u64 = 60;//3600; // Start proposal 1 hour after creation by default
 pub const DIVISION_GUARD: u64 = 1000000000000000000; // 1e18
 
 multiversx_sc::imports!();
@@ -49,9 +49,9 @@ pub struct Proposal<M: ManagedTypeApi> {
 }
 
 #[type_abi]
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct VoteContext<M: ManagedTypeApi> {
-    pub decision: VoteDecision,
+    pub decision: u8,
     pub voting_power: BigUint<M>,
     pub timestamp: u64,
     pub block: u64,
@@ -65,6 +65,16 @@ pub struct ProposalVoteCount<M: ManagedTypeApi> {
     pub abstain: BigUint<M>,
     pub reject: BigUint<M>,
     pub invalid: BigUint<M>,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct FullProposalContext<M: ManagedTypeApi> {
+    pub proposal: Proposal<M>,
+    pub users_voting_power: BigUint<M>,
+    pub users_vote: Option<VoteContext<M>>,
+    pub proposal_status: u8,
+    pub proposal_vote_count: ProposalVoteCount<M>,
 }
 
 #[multiversx_sc::module]
@@ -141,7 +151,7 @@ pub trait VotingModule: crate::storage::StorageModule + crate::events::EventsMod
             .update(|votes| *votes += &voting_power);
 
         let vote_context = VoteContext {
-            decision,
+            decision: decision as u8,
             voting_power,
             timestamp: self.blockchain().get_block_timestamp(),
             block: self.blockchain().get_block_nonce(),

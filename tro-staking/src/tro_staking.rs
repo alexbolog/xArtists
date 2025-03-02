@@ -8,8 +8,8 @@ pub mod proxy;
 
 pub mod admin;
 mod events;
-mod storage;
 pub mod stake;
+mod storage;
 pub mod views;
 pub mod voting;
 
@@ -27,13 +27,8 @@ pub trait TroStaking:
     + views::ViewsModule
 {
     #[init]
-    fn init(
-        &self,
-        tro_token_identifier: TokenIdentifier,
-        lp_token_identifiers: MultiValueEncoded<TokenIdentifier>,
-    ) {
+    fn init(&self, tro_token_identifier: TokenIdentifier) {
         self.tro_token_identifier().set(tro_token_identifier);
-        self.add_whitelisted_lp_tokens(lp_token_identifiers);
         self.last_proposal_id().set(0);
     }
 
